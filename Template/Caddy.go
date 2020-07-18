@@ -1,7 +1,7 @@
 package Template
 
-func TemplateCaddy() string {
-	TemplateCaddyFile := `
+func TemplateCaddyHttps() string {
+	TemplateCaddyFileHttps := `
 vip.jinli.plus
 {
 	tls maniac.cn@gmail.com
@@ -19,7 +19,30 @@ vip.jinli.plus
 
 }`
 
-	return TemplateCaddyFile
+	return TemplateCaddyFileHttps
+
+}
+
+func TemplateCaddyHttp() string {
+	TemplateCaddyFileHttp := `
+http://http://vip.jinli.plus
+{
+	tls maniac.cn@gmail.com
+	encode gzip
+	file_server * browse
+	root * /var/www/html/
+	php_fastcgi php:9000
+	log {
+		output file /var/log/access.log {
+			roll_size 10gb
+			roll_keep 365
+			roll_keep_for 720h
+		}
+	}
+
+}`
+
+	return TemplateCaddyFileHttp
 
 }
 
