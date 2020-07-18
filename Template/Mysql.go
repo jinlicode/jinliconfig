@@ -1,6 +1,6 @@
 package Template
 
-func TemplateMysql() string {
+func MysqlCnf() string {
 	TemplateMysqlCnf := `
 [client]
 default-character-set = utf8mb4

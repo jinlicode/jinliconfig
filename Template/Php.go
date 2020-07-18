@@ -1,6 +1,6 @@
 package Template
 
-func TemplatePhpWww() string {
+func PhpWww() string {
 	TemplatePhp := `
 [www]
 user = www-data
@@ -19,7 +19,7 @@ php_admin_flag[log_errors] = on
 	return TemplatePhp
 }
 
-func TemplatePhpFpm() string {
+func PhpFpm() string {
 	TemplateFpm := `
 [global]
 include=etc/php-fpm.d/*.conf
@@ -27,7 +27,7 @@ include=etc/php-fpm.d/*.conf
 	return TemplateFpm
 }
 
-func TemplatePhpIni() string {
+func PhpIni() string {
 	TemplatePhpIniStrint := `
 [PHP]
 engine = On
