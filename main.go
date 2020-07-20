@@ -3,19 +3,32 @@ package main
 import (
 	"fmt"
 	"jinlicode/Class"
+	"os"
 )
 
 func main() {
 
-	const BasePath = "/var/jinli_deploy/"
-	File := Class.CheckFileExist(BasePath + "docker-compose.yaml")
-	fmt.Println(File)
-	if Class.CheckFileExist(BasePath + "docker-compose.yaml") {
-		fmt.Println("目录存在")
-	} else {
-		fmt.Println("目录不存在")
-	}
-	menu := Class.ConsoleOptionsSelect("run", []string{"", "重新安装（不删除数据）", "重新安装（删除数据）", "管理服务"}, "请输入选项")
+	//配置常量
+	const (
+		//基础目录配置
+		BASEPATH = "/var/discuz_deploy/"
+	)
 
-	print(menu)
+	if Class.CheckFileExist(BASEPATH + "docker-compose.yaml") {
+		//读取docker-compose配置文件
+		DockerComposeYamlRead := Class.ReadFile(BASEPATH + "docker-compose.yaml")
+		DockerComposeCaddyFile := Class.ReadFile(BASEPATH + "config/caddy/Caddyfile")
+		println(DockerComposeYamlRead)
+		println(DockerComposeCaddyFile)
+		menu := Class.ConsoleOptionsSelect("run", []string{"管理服务", "证书问题", "增加网站"}, "请输入选项")
+		fmt.Println(menu)
+	} else {
+		fmt.Println("您未安装锦鲤部署，是否要安装？")
+		NewInstall := Class.ConsoleOptionsSelect("请输入您的选项", []string{"否", "是"}, "请选择是否重新安装")
+		if NewInstall == "否" {
+			os.Exit(3)
+		} else {
+			fmt.Println("安装过程")
+		}
+	}
 }
