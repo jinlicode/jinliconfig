@@ -20,14 +20,14 @@ func main() {
 		DockerComposeYamlRead := Class.ReadFile(BASEPATH + "docker-compose.yaml")
 
 		//读取Caddyfile文件内容
-		DockerComposeCaddyFile := Class.ReadFile(BASEPATH + "config/caddy/Caddyfile")
+		// DockerComposeCaddyFile := Class.ReadFile(BASEPATH + "config/caddy/Caddyfile")
 
 		//获取mysql配置文件
 		DockerComposeMysqlConfig := Class.MysqlInfo(DockerComposeYamlRead)
-		
+
 		fmt.Println(DockerComposeMysqlConfig)
-		println(DockerComposeCaddyFile)
-		menu := Class.ConsoleOptionsSelect("run", []string{"管理服务", "证书问题", "增加网站"}, "请输入选项")
+		// println(DockerComposeCaddyFile)
+		menu := Class.ConsoleOptionsSelect("请选择您需要的服务", []string{"网站服务", "备份管理", "退出"}, "请输入选项")
 		fmt.Println(menu)
 	} else {
 		fmt.Println("您未安装锦鲤部署，是否要安装？")

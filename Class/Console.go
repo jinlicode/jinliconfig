@@ -50,31 +50,20 @@ func ConsoleUserInput(msg string) string {
 
 //mysql数据库信息获取
 func MysqlInfo(YamlFile string) map[string]interface{} {
-	println(YamlFile)
+	YamlMap := YamlFileToMap(YamlFile)
+	return YamlMap
+}
+
+// 转换Yaml文件为Map
+func YamlFileToMap(YamlFile string) map[string]interface{} {
 	DockerComposeJson, _ := yaml.YAMLToJSON([]byte(YamlFile))
 	var m map[string]interface{}
 	json.Unmarshal([]byte(DockerComposeJson), &m)
 	return m
 }
 
-// Convert json string to map
-func JsonToMap(jsonStr string) (map[string]string, error) {
-	m := make(map[string]string)
-	err := json.Unmarshal([]byte(jsonStr), &m)
-	if err != nil {
-		fmt.Printf("Unmarshal with error: %+v\n", err)
-		return nil, err
-	}
-
-	for k, v := range m {
-		fmt.Printf("%v: %v\n", k, v)
-	}
-
-	return m, nil
-}
-
-// Convert map json string
-func MapToJson(m map[string]string) (string, error) {
+// 转换Map为json文件
+func MapToJson(m map[string]interface{}) (string, error) {
 	jsonByte, err := json.Marshal(m)
 	if err != nil {
 		fmt.Printf("Marshal with error: %+v\n", err)
