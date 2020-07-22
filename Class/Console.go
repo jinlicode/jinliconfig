@@ -49,9 +49,13 @@ func ConsoleUserInput(msg string) string {
 // }
 
 //mysql数据库信息获取
-func MysqlInfo(YamlFile string) map[string]interface{} {
+func MysqlInfo(YamlFile string) string {
+	//yaml转换成map
 	YamlMap := YamlFileToMap(YamlFile)
-	return YamlMap
+	//map获取数据库密码
+	MysqlPassword := YamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"]
+
+	return MysqlPassword.(string)
 }
 
 // 转换Yaml文件为Map
