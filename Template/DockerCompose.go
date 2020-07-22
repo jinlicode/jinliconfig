@@ -95,6 +95,7 @@ func DockerComposeMemcached() string {
   `
 	return Memcached
 }
-func DockerComposeRedis() string {
 
-}
+// func DockerComposeRedis() string {
+
+// }

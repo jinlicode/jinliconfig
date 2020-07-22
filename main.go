@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"jinlicode/Class"
+	"jinliconfig/Class"
 	"os"
 )
 
@@ -15,10 +15,17 @@ func main() {
 	)
 
 	if Class.CheckFileExist(BASEPATH + "docker-compose.yaml") {
+
 		//读取docker-compose配置文件
 		DockerComposeYamlRead := Class.ReadFile(BASEPATH + "docker-compose.yaml")
+
+		//读取Caddyfile文件内容
 		DockerComposeCaddyFile := Class.ReadFile(BASEPATH + "config/caddy/Caddyfile")
-		println(DockerComposeYamlRead)
+
+		//获取mysql配置文件
+		DockerComposeMysqlConfig := Class.MysqlInfo(DockerComposeYamlRead)
+		
+		fmt.Println(DockerComposeMysqlConfig)
 		println(DockerComposeCaddyFile)
 		menu := Class.ConsoleOptionsSelect("run", []string{"管理服务", "证书问题", "增加网站"}, "请输入选项")
 		fmt.Println(menu)
