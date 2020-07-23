@@ -23,9 +23,9 @@ func main() {
 		// DockerComposeCaddyFile := Class.ReadFile(BASEPATH + "config/caddy/Caddyfile")
 
 		//获取mysql配置文件
-		DockerComposeMysqlConfig := Class.MysqlInfo(DockerComposeYamlRead)
+		MysqlHost, MysqlUser, MysqlPassword := Class.MysqlInfo(DockerComposeYamlRead)
 
-		fmt.Println(DockerComposeMysqlConfig)
+		fmt.Println(MysqlHost, MysqlUser, MysqlPassword)
 		// println(DockerComposeCaddyFile)
 		menu := Class.ConsoleOptionsSelect("请选择您需要的服务", []string{"网站服务", "备份管理", "退出"}, "请输入选项")
 		fmt.Println(menu)

@@ -49,13 +49,15 @@ func ConsoleUserInput(msg string) string {
 // }
 
 //mysql数据库信息获取
-func MysqlInfo(YamlFile string) string {
+func MysqlInfo(YamlFile string) (string, string, string) {
 	//yaml转换成map
 	YamlMap := YamlFileToMap(YamlFile)
 	//map获取数据库密码
 	MysqlPassword := YamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"]
+	MysqlHost := YamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["networks"].(map[string]interface{})["discuz"].(map[string]interface{})["ipv4_address"]
+	MysqlUser := "root"
 
-	return MysqlPassword.(string)
+	return MysqlHost.(string), MysqlUser, MysqlPassword.(string)
 }
 
 // 转换Yaml文件为Map
