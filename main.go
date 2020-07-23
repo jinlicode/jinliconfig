@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"jinliconfig/Class"
+	"jinliconfig/class"
 	"os"
 )
 
@@ -14,24 +14,23 @@ func main() {
 		BASEPATH = "/var/discuz_deploy/"
 	)
 
-	if Class.CheckFileExist(BASEPATH + "docker-compose.yaml") {
+	if class.CheckFileExist(BASEPATH + "docker-compose.yaml") {
 
 		//读取docker-compose配置文件
-		DockerComposeYamlRead := Class.ReadFile(BASEPATH + "docker-compose.yaml")
+		DockerComposeYamlRead := class.ReadFile(BASEPATH + "docker-compose.yaml")
 
 		//读取Caddyfile文件内容
-		// DockerComposeCaddyFile := Class.ReadFile(BASEPATH + "config/caddy/Caddyfile")
+		// DockerComposeCaddyFile := class.ReadFile(BASEPATH + "config/caddy/Caddyfile")
 
 		//获取mysql配置文件
-		MysqlHost, MysqlUser, MysqlPassword := Class.MysqlInfo(DockerComposeYamlRead)
-
-		fmt.Println(MysqlHost, MysqlUser, MysqlPassword)
+		menumysql := class.ConsoleOptionsSelect("请选择您需要管理的数据库", class.MysqlInfo(DockerComposeYamlRead), "请输入选项")
+		fmt.Println(menumysql)
 		// println(DockerComposeCaddyFile)
-		menu := Class.ConsoleOptionsSelect("请选择您需要的服务", []string{"网站服务", "备份管理", "退出"}, "请输入选项")
+		menu := class.ConsoleOptionsSelect("请选择您需要的服务", []string{"网站服务", "备份管理", "退出"}, "请输入选项")
 		fmt.Println(menu)
 	} else {
 		fmt.Println("您未安装锦鲤部署，是否要安装？")
-		NewInstall := Class.ConsoleOptionsSelect("请输入您的选项", []string{"否", "是"}, "请选择是否重新安装")
+		NewInstall := class.ConsoleOptionsSelect("请输入您的选项", []string{"否", "是"}, "请选择是否重新安装")
 		if NewInstall == "否" {
 			os.Exit(3)
 		} else {
