@@ -25,6 +25,7 @@ func MapToJson(m map[string]interface{}) (string, error) {
 	return string(jsonByte), nil
 }
 
+//一维map转换切片 string类型
 func mapToSlice(m map[string]string) []string {
 	s := make([]string, 0, len(m))
 	for _, v := range m {
