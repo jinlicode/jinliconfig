@@ -13,6 +13,10 @@ func main() {
 		//基础目录配置
 		BASEPATH = "/var/discuz_deploy/"
 	)
+	if os.Getuid() != 0 {
+		fmt.Println("您的用户权限太低，请使用root用户执行，命令为：sudo su")
+		os.Exit(3)
+	}
 
 	if class.CheckFileExist(BASEPATH + "docker-compose.yaml") {
 
