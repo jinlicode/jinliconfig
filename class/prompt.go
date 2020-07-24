@@ -36,3 +36,23 @@ func ConsoleUserInput(msg string) string {
 		return name
 	}
 }
+
+//要求用户确认,返回布尔值
+func ConsoleUserConfirm(msg string) bool {
+	name := false
+	prompt := &survey.Confirm{
+		Message: msg,
+	}
+	survey.AskOne(prompt, &name)
+	return name
+}
+
+//多行文本输入，一般是输入证书时候使用，返回string类型
+func ConsoleUserText(msg string) string {
+	text := ""
+	prompt := &survey.Multiline{
+		Message: msg,
+	}
+	survey.AskOne(prompt, &text)
+	return text
+}
