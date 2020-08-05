@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"jinliconfig/Template"
 	"jinliconfig/class"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 func main() {
@@ -41,6 +43,11 @@ func main() {
 
 		//读取docker-compose配置文件
 		// DockerComposeYamlRead := class.ReadFile(BASEPATH + "docker-compose.yaml")
+		// DockerComposeYamlMap := class.YamlFileToMap(DockerComposeYamlRead)
+
+		// fmt.Printf("%v\n", DockerComposeYamlMap["networks"].(map[string]interface{})["discuz"])
+
+		// fmt.Println(DockerComposeYamlRead)
 
 		//读取Caddyfile文件内容
 		// DockerComposeCaddyFile := class.ReadFile(BASEPATH + "config/caddy/Caddyfile")
@@ -64,6 +71,13 @@ func main() {
 				goto ServiceSelect
 			case "新增网站":
 				NewSiteDomain := class.ConsoleUserInput("请输入您需要添加的域名：")
+
+				//检测网站域名是否输入正确
+				if !class.CheckDomain(NewSiteDomain) {
+					fmt.Println("您输入的域名不正确，已退出操作！")
+					os.Exit(3)
+				}
+
 				NewSiteHTTPS := class.ConsoleOptionsSelect("是否使用HTTPS", []string{"是", "否"}, "请输入选项")
 				if NewSiteHTTPS == "否" {
 					fmt.Println("您选择了没有https证书，如果选择错误请按Ctrl+C结束当前进程")
@@ -85,7 +99,31 @@ func main() {
 					}
 				}
 				NewSitePhpVersion := class.ConsoleOptionsSelect("请选择您需要的php版本", []string{"5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0"}, "请输入选项")
-				fmt.Println("域名："+NewSiteDomain, " 是否启用https："+NewSiteHTTPS, " php版本："+NewSitePhpVersion)
+
+				//再回显一次输入的内容判断是否真的要开始安装
+				LastReConfirm := class.ConsoleUserConfirm("\n域名：[" + NewSiteDomain + "]\n是否启用https：[" + NewSiteHTTPS + "]\nphp版本：[" + NewSitePhpVersion + "]\n确定是否立即安装")
+				if LastReConfirm != true {
+					fmt.Println("已取消操作")
+					os.Exit(3)
+				}
+
+				//获取php 镜像模版
+				SitePhpVersionCompose := Template.DockerComposePhp()
+
+				newDomain := NewSiteDomain
+				newDomain = strings.Replace(newDomain, ".", "_", -1)
+
+				//替换域名
+				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "php:", newDomain+":", 1)
+				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "- ./code:", "- ./code/"+newDomain+":", 1)
+
+				//替换php版本
+				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "image: jinlicode/discuz_docker:latest", "image: jinlicode/discuz_docker:"+NewSitePhpVersion, 1)
+
+				//写入docker-compose.yaml 文件
+
+				fmt.Println(SitePhpVersionCompose)
+
 			case WebServiceSelect:
 				WebConfigSelect := class.ConsoleOptionsSelect("请选择您需要管理的网站服务", []string{WebServiceSelect + "的" + "nginx配置", WebServiceSelect + "的" + "php配置", WebServiceSelect + "的" + "数据库配置", "返回上层"}, "请输入选项")
 				//网站内服务修改主菜单
