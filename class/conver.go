@@ -33,3 +33,21 @@ func mapToSlice(m map[string]string) []string {
 	}
 	return s
 }
+
+// map 转yaml 类型
+func MapToYaml(m map[string]interface{}) (string, error) {
+
+	//先转成json
+
+	jsonByte, err := json.Marshal(m)
+	if err != nil {
+		return "map to json error", nil
+	}
+
+	y, err := yaml.JSONToYAML(jsonByte)
+	if err != nil {
+		return "json to yaml error", nil
+	}
+	//最后转成yaml
+	return string(y), nil
+}
