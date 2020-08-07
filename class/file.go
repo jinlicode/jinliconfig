@@ -21,3 +21,15 @@ func ReadFile(path string) string {
 	}
 	return string(f)
 }
+
+//写入文件，传入文件路径
+func WriteFile(path string, content string) bool {
+	err := ioutil.WriteFile(path, []byte(content), 0666)
+
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		panic(err)
+	}
+
+	return true
+}

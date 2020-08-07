@@ -37,7 +37,6 @@ func DockerComposeCaddy() string {
 
 func DockerComposePhp() string {
 	Php := `
-  php:
     image: jinlicode/discuz_docker:latest
     user: 10000:10000
     volumes:

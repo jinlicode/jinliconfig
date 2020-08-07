@@ -42,9 +42,17 @@ func main() {
 	if class.CheckFileExist(BASEPATH + "docker-compose.yaml") {
 
 		//读取docker-compose配置文件
-		// DockerComposeYamlRead := class.ReadFile(BASEPATH + "docker-compose.yaml")
-		// DockerComposeYamlMap := class.YamlFileToMap(DockerComposeYamlRead)
+		DockerComposeYamlRead := class.ReadFile(BASEPATH + "docker-compose.yaml")
+		DockerComposeYamlMap := class.YamlFileToMap(DockerComposeYamlRead)
 
+		//获取已经存在的网站
+		ExistSiteSlice := []string{}
+		for k := range DockerComposeYamlMap["services"].(map[string]interface{}) {
+			if k != "caddy" && k != "memcached" && k != "mysql" && k != "php" {
+				ExistSiteSlice = append(ExistSiteSlice, strings.Replace(k, "_", ".", -1))
+			}
+		}
+		fmt.Println(ExistSiteSlice)
 		// fmt.Printf("%v\n", DockerComposeYamlMap["networks"].(map[string]interface{})["discuz"])
 
 		// fmt.Println(DockerComposeYamlRead)
@@ -64,18 +72,22 @@ func main() {
 		case "网站服务":
 			//网站服务选择主菜单
 		WebServiceSelect:
-			WebServiceSelect := class.ConsoleOptionsSelect("请选择您需要管理的网站", []string{"www.baidu.com", "wwww.jinli.plus", "新增网站", "返回上层"}, "请输入选项")
+			WebServiceSelectOption := []string{}
+			WebServiceSelectOption = append(ExistSiteSlice, "新增网站", "返回上层")
+			WebServiceSelect := class.ConsoleOptionsSelect("请选择您需要管理的网站", WebServiceSelectOption, "请输入选项")
 			switch WebServiceSelect {
 			case "返回上层":
 				fmt.Println("返回上层")
 				goto ServiceSelect
 			case "新增网站":
+			ReInputSiteDomainFlag:
 				NewSiteDomain := class.ConsoleUserInput("请输入您需要添加的域名：")
+				NewSiteDomain = strings.TrimSpace(NewSiteDomain)
 
 				//检测网站域名是否输入正确
 				if !class.CheckDomain(NewSiteDomain) {
-					fmt.Println("您输入的域名不正确，已退出操作！")
-					os.Exit(3)
+					fmt.Println("您输入的域名不正确，已退出操作请重新输入！")
+					goto ReInputSiteDomainFlag
 				}
 
 				NewSiteHTTPS := class.ConsoleOptionsSelect("是否使用HTTPS", []string{"是", "否"}, "请输入选项")
@@ -114,15 +126,21 @@ func main() {
 				newDomain = strings.Replace(newDomain, ".", "_", -1)
 
 				//替换域名
-				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "php:", newDomain+":", 1)
 				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "- ./code:", "- ./code/"+newDomain+":", 1)
 
 				//替换php版本
 				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "image: jinlicode/discuz_docker:latest", "image: jinlicode/discuz_docker:"+NewSitePhpVersion, 1)
 
-				//写入docker-compose.yaml 文件
+				//生成子map
+				NewSitePhpVersionComposeMap := class.YamlFileToMap(SitePhpVersionCompose)
 
-				fmt.Println(SitePhpVersionCompose)
+				//插入到总的yaml文件中
+				DockerComposeYamlMap["services"].(map[string]interface{})[newDomain] = NewSitePhpVersionComposeMap
+
+				//写入docker-compose.yaml 文件
+				NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
+				class.WriteFile(BASEPATH+"docker-compose.yaml", NewDockerComposeYamlString)
+				// fmt.Println(NewDockerComposeYamlString)
 
 			case WebServiceSelect:
 				WebConfigSelect := class.ConsoleOptionsSelect("请选择您需要管理的网站服务", []string{WebServiceSelect + "的" + "nginx配置", WebServiceSelect + "的" + "php配置", WebServiceSelect + "的" + "数据库配置", "返回上层"}, "请输入选项")
