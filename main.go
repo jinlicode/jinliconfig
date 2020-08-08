@@ -66,19 +66,19 @@ func main() {
 		// println(DockerComposeCaddyFile)
 
 		//服务选择主菜单
-	ServiceSelect:
+	ServiceSelectFlag:
 		ServiceSelect := class.ConsoleOptionsSelect("请选择您需要的服务", []string{"网站服务", "备份管理", "退出"}, "请输入选项")
 		switch ServiceSelect {
 		case "网站服务":
 			//网站服务选择主菜单
-		WebServiceSelect:
+		WebServiceSelectFlag:
 			WebServiceSelectOption := []string{}
 			WebServiceSelectOption = append(ExistSiteSlice, "新增网站", "返回上层")
 			WebServiceSelect := class.ConsoleOptionsSelect("请选择您需要管理的网站", WebServiceSelectOption, "请输入选项")
 			switch WebServiceSelect {
 			case "返回上层":
 				fmt.Println("返回上层")
-				goto ServiceSelect
+				goto ServiceSelectFlag
 			case "新增网站":
 			ReInputSiteDomainFlag:
 				NewSiteDomain := class.ConsoleUserInput("请输入您需要添加的域名：")
@@ -106,7 +106,7 @@ func main() {
 							fmt.Println(CertCERInput)
 							fmt.Println(CertKEYInput)
 						} else {
-							goto WebServiceSelect
+							goto WebServiceSelectFlag
 						}
 					}
 				}
@@ -143,27 +143,102 @@ func main() {
 				// fmt.Println(NewDockerComposeYamlString)
 
 			case WebServiceSelect:
-				WebConfigSelect := class.ConsoleOptionsSelect("请选择您需要管理的网站服务", []string{WebServiceSelect + "的" + "nginx配置", WebServiceSelect + "的" + "php配置", WebServiceSelect + "的" + "数据库配置", "返回上层"}, "请输入选项")
+				WebConfigSelect := class.ConsoleOptionsSelect("请选择您需要管理的网站服务", []string{
+					WebServiceSelect + "的" + "nginx配置",
+					WebServiceSelect + "的" + "php配置",
+					WebServiceSelect + "的" + "数据库配置",
+					"暂停" + WebServiceSelect + "网站服务",
+					"删除" + WebServiceSelect + "的网站(不删除数据)",
+					"删除" + WebServiceSelect + "的网站(删除数据，包含数据库和程序)",
+					"返回上层"}, "请输入选项")
 				//网站内服务修改主菜单
-			WebConfigSelect:
+			WebConfigSelectFlag:
 				switch WebConfigSelect {
 				case "返回上层":
 					fmt.Println("返回上层")
-					goto WebServiceSelect
+					goto WebServiceSelectFlag
 				case WebServiceSelect + "的" + "nginx配置":
 					fmt.Println(WebServiceSelect + "的" + "nginx配置")
 					switch WebConfigSelect {
 					case "返回上层":
 						fmt.Println("返回上层")
-						goto WebConfigSelect
+						goto WebConfigSelectFlag
 					}
 				case WebServiceSelect + "的" + "php配置":
 					fmt.Println(WebServiceSelect + "的" + "php配置")
 				case WebServiceSelect + "的" + "数据库配置":
 					fmt.Println(WebServiceSelect + "的" + "数据库配置")
+					fmt.Println(WebServiceSelect + "的" + "php配置")
+				case "暂停" + WebServiceSelect + "网站服务":
+					//确定是否需要暂停
+					ReStopSiteConfirm := class.ConsoleUserConfirm("确定暂停" + WebServiceSelect + "服务吗？")
+					if ReStopSiteConfirm != true {
+						fmt.Println("已取消操作")
+						goto WebServiceSelectFlag
+					}
+
+					//输入命令 暂停容器
+					// fmt.Println("cd " + BASEPATH + " && docker-compose stop " + strings.Replace(WebServiceSelect, ".", "_", -1))
+					cmd := exec.Command("cd " + BASEPATH + " && docker-compose stop " + strings.Replace(WebServiceSelect, ".", "_", -1))
+					cmd.Stdout = os.Stdout
+					cmd.Run()
+					fmt.Println("暂停成功")
+
+				case "删除" + WebServiceSelect + "的网站(不删除数据)":
+					//确定是否需要删除
+					ReDelSiteConfirm := class.ConsoleUserConfirm("确定删除" + WebServiceSelect + "网站吗？(不删除数据)")
+					if ReDelSiteConfirm != true {
+						fmt.Println("已取消操作")
+						goto WebServiceSelectFlag
+					}
+					//输入命令 删除yaml中服务
+					MapKey := strings.Replace(WebServiceSelect, ".", "_", -1)
+					// fmt.Println("cd " + BASEPATH + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
+					cmd := exec.Command("cd " + BASEPATH + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
+					cmd.Stdout = os.Stdout
+					cmd.Run()
+
+					//执行完之后删除yaml中对应的map
+					delete(DockerComposeYamlMap["services"].(map[string]interface{}), MapKey)
+
+					//重新写入到yaml
+					NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
+					class.WriteFile(BASEPATH+"docker-compose.yaml", NewDockerComposeYamlString)
+					fmt.Println("删除成功")
+
+				case "删除" + WebServiceSelect + "的网站(删除数据，包含数据库和程序)":
+					//确定是否需要删除
+					ReDelSiteConfirm := class.ConsoleUserConfirm("确定删除" + WebServiceSelect + "网站吗？(删除数据，包含数据库和程序)")
+					if ReDelSiteConfirm != true {
+						fmt.Println("已取消操作")
+						goto WebServiceSelectFlag
+					}
+					//输入命令 删除yaml中服务
+					MapKey := strings.Replace(WebServiceSelect, ".", "_", -1)
+					// fmt.Println("cd " + BASEPATH + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
+					cmd := exec.Command("cd " + BASEPATH + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
+					cmd.Stdout = os.Stdout
+					cmd.Run()
+
+					//执行完之后删除yaml中对应的map
+					delete(DockerComposeYamlMap["services"].(map[string]interface{}), MapKey)
+
+					//重新写入到yaml
+					NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
+					class.WriteFile(BASEPATH+"docker-compose.yaml", NewDockerComposeYamlString)
+
+					//操作删除工作 删除代码目录  删除  数据库 drop database bbbbbbbb
+
+					exec.Command("rm -rf " + BASEPATH + "/" + MapKey + " && docker-compose exec mysql bash -c \"mysql -uroot -pdiscuz -e 'drop database bbbbbbbb'\"")
+					cmd.Stdout = os.Stdout
+					cmd.Run()
+
+					fmt.Println("删除成功")
+
 				}
 
 			}
+
 		case "备份管理":
 			fmt.Println("备份管理")
 		case "木马查杀":
