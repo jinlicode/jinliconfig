@@ -216,9 +216,7 @@ func main() {
 					//输入命令 删除yaml中服务
 					MapKey := strings.Replace(WebServiceSelect, ".", "_", -1)
 					// fmt.Println("cd " + BASEPATH + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
-					cmd := exec.Command("cd " + BASEPATH + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
-					cmd.Stdout = os.Stdout
-					cmd.Run()
+					class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
 
 					//执行完之后删除yaml中对应的map
 					delete(DockerComposeYamlMap["services"].(map[string]interface{}), MapKey)
@@ -228,10 +226,8 @@ func main() {
 					class.WriteFile(BASEPATH+"docker-compose.yaml", NewDockerComposeYamlString)
 
 					//操作删除工作 删除代码目录  删除  数据库 drop database bbbbbbbb
-
-					exec.Command("rm -rf " + BASEPATH + "/" + MapKey + " && docker-compose exec mysql bash -c \"mysql -uroot -pdiscuz -e 'drop database bbbbbbbb'\"")
-					cmd.Stdout = os.Stdout
-					cmd.Run()
+					MysqlPassword := DockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"]
+					class.ExecLinuxCommand("rm -rf " + BASEPATH + "/" + MapKey + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + MysqlPassword.(string) + " -e 'drop database " + MapKey + "'\"")
 
 					fmt.Println("删除成功")
 
@@ -254,7 +250,22 @@ func main() {
 		if NewInstall == "否" {
 			os.Exit(3)
 		} else {
+			//执行安装docker
+			class.ExecDockerInstall()
+
+			//创建项目目录
+			class.ExecLinuxCommand("mkdir " + BASEPATH)
+
+			//创建代码目录
+			class.ExecLinuxCommand("mkdir " + BASEPATH + "code/")
+
+			//设置代码目录为 10000,10000
+			class.ExecLinuxCommand("chown -R 10000:10000 " + BASEPATH + "code/")
+
+			//自动创建yaml标准模版
+
 			fmt.Println("安装过程")
+
 		}
 	}
 }
