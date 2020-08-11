@@ -41,3 +41,19 @@ func ExecLinuxCommand(CommandString string) {
 
 	cmd.Wait()
 }
+
+//ExecDockerInstall 执行安装docker操作
+func ExecDockerInstall() {
+	//关闭防火墙
+	ExecLinuxCommand("systemctl stop firewalld.service && systemctl disable firewalld.service && setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config")
+	// step 1: 安装必要的一些系统工具
+	ExecLinuxCommand("sudo yum install -y yum-utils device-mapper-persistent-data lvm2 git epel-*")
+	// Step 2: 添加软件源信息
+	ExecLinuxCommand("sudo yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo")
+	// Step 3: 更新并安装 Docker-CE
+	ExecLinuxCommand("sudo yum makecache fast && sudo yum -y install docker-ce docker-compose")
+	// Step 4: 开启Docker服务
+	ExecLinuxCommand("sudo systemctl start docker")
+	// step 5: 设置开机启动
+	ExecLinuxCommand("sudo systemctl enable docker")
+}
