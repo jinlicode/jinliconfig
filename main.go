@@ -250,6 +250,16 @@ func main() {
 		if NewInstall == "否" {
 			os.Exit(3)
 		} else {
+			//协议内容
+			AgreementText := Template.Agreement()
+			fmt.Println(AgreementText)
+			Agree := class.ConsoleOptionsSelect("您是否同意此协议", []string{"否", "是"}, "请选择是否同意协议")
+			if Agree == "否" {
+				fmt.Println("您未同意安装协议，程序已退出")
+				os.Exit(3)
+			}
+			fmt.Println("开始安装程序，请稍等...")
+
 			//执行安装docker
 			class.ExecDockerInstall()
 
@@ -258,6 +268,9 @@ func main() {
 
 			//创建代码目录
 			class.ExecLinuxCommand("mkdir " + BASEPATH + "code/")
+
+			//创建各配置项目录
+			class.ExecLinuxCommand("mkdir " + BASEPATH + "/config/ && mkdir " + BASEPATH + "/config/cert/ && mkdir " + BASEPATH + "/config/mysql/ && mkdir " + BASEPATH + "/config/nginx/ && mkdir " + BASEPATH + "/config/php/")
 
 			//设置代码目录为 10000,10000
 			class.ExecLinuxCommand("chown -R 10000:10000 " + BASEPATH + "code/")
