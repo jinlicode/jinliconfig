@@ -42,6 +42,11 @@ func main() {
 						欢迎使用锦鲤网站管理系统 v1.1
 		`
 	fmt.Println(Welcome)
+
+	//检测是否安装了docker
+
+	//如果已经安装 提示他是否卸载
+
 CreateNewSiteFlag:
 
 	if class.CheckFileExist(BASEPATH + "docker-compose.yaml") {
