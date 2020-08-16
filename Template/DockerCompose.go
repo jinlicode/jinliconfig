@@ -1,19 +1,22 @@
 package Template
 
+func DockerComposeVersion() string {
+	Version := `3.1`
+	return Version
+}
+
 func DockerComposeNetWorks() string {
 	NetWorks := `
-networks: 
-	discuz:
-	  ipam:
-		driver: default
-		config:
-		  - subnet: "10.99.1.0/24"
+discuz:
+  ipam:
+  driver: default
+  config:
+    - subnet: "10.99.1.0/16"
 `
 	return NetWorks
 }
 func DockerComposeNginx() string {
 	Nginx := `
-  nginx:
     image: jinlicode/nginx:v1
     ports:
         - "80:80"
@@ -32,8 +35,8 @@ func DockerComposeNginx() string {
         #- XDG_DATA_HOME=/root
     networks:
       discuz:
-        ipv4_address: 10.99.1.2
-	`
+        ipv4_address: 10.99.1.1
+`
 	return Nginx
 }
 
@@ -56,13 +59,12 @@ func DockerComposePhp() string {
         - nginx
     networks:
       discuz:
-        ipv4_address: 10.99.1.3
+        ipv4_address: 10.99.2.1
 `
 	return Php
 }
 func DockerComposeMysql() string {
 	Mysql := `
-  mysql:
     image: mysql:5.7.30
     restart: always
     container_name: mysql
@@ -78,7 +80,7 @@ func DockerComposeMysql() string {
       TZ: Asia/Shanghai
     networks:
       discuz:
-        ipv4_address: 10.99.1.4
+        ipv4_address: 10.99.3.1
   `
 	return Mysql
 }
@@ -92,7 +94,7 @@ func DockerComposeMemcached() string {
       - MEMCACHED_CACHE_SIZE=64
     networks:
       discuz:
-        ipv4_address: 10.99.1.5
+        ipv4_address: 10.99.4.1
   `
 	return Memcached
 }

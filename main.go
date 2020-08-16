@@ -42,6 +42,7 @@ func main() {
 						欢迎使用锦鲤网站管理系统 v1.1
 		`
 	fmt.Println(Welcome)
+CreateNewSiteFlag:
 
 	if class.CheckFileExist(BASEPATH + "docker-compose.yaml") {
 
@@ -141,6 +142,15 @@ func main() {
 				//插入到总的yaml文件中
 				DockerComposeYamlMap["services"].(map[string]interface{})[newDomain] = NewSitePhpVersionComposeMap
 
+				//自动创建以网站名字命名的程序目录
+				class.ExecLinuxCommand("mkdir " + BASEPATH + "/code/" + newDomain)
+
+				//创建网站的配置文件到对应的config配置文件中
+				class.ExecLinuxCommand("mkdir " + BASEPATH + "/config/php/" + newDomain)
+				class.WriteFile(BASEPATH+"config/php"+newDomain+"/www.conf", Template.PhpWww())
+				class.WriteFile(BASEPATH+"config/php"+newDomain+"/php.ini", Template.PhpIni())
+				class.WriteFile(BASEPATH+"config/php"+newDomain+"/php-fpm.conf", Template.PhpFpm())
+
 				//写入docker-compose.yaml 文件
 				NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
 				class.WriteFile(BASEPATH+"docker-compose.yaml", NewDockerComposeYamlString)
@@ -197,10 +207,7 @@ func main() {
 					}
 					//输入命令 删除yaml中服务
 					MapKey := strings.Replace(WebServiceSelect, ".", "_", -1)
-					// fmt.Println("cd " + BASEPATH + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
-					cmd := exec.Command("cd " + BASEPATH + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
-					cmd.Stdout = os.Stdout
-					cmd.Run()
+					class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
 
 					//执行完之后删除yaml中对应的map
 					delete(DockerComposeYamlMap["services"].(map[string]interface{}), MapKey)
@@ -286,8 +293,24 @@ func main() {
 
 			//自动创建yaml标准模版
 
-			fmt.Println("安装过程")
+			// fmt.Println("安装过程")
 
+			DockerComposeVersion := Template.DockerComposeVersion()
+			DockerComposeNginxMap := class.YamlFileToMap(Template.DockerComposeNginx())
+			DockerComposeMysqlMap := class.YamlFileToMap(Template.DockerComposeMysql())
+			DockerComposeNetWorksMap := class.YamlFileToMap(Template.DockerComposeNetWorks())
+
+			DockerComposeMap := make(map[string]interface{})
+			DockerComposeMap["version"] = DockerComposeVersion
+			DockerComposeMap["services"] = make(map[string]interface{})
+			DockerComposeMap["services"].(map[string]interface{})["nginx"] = DockerComposeNginxMap
+			DockerComposeMap["services"].(map[string]interface{})["mysql"] = DockerComposeMysqlMap
+			DockerComposeMap["networks"] = DockerComposeNetWorksMap
+
+			//写入yaml文件 跳转到新建网站
+			DockerComposeYamlString, _ := class.MapToYaml(DockerComposeMap)
+			class.WriteFile(BASEPATH+"docker-compose.yaml", DockerComposeYamlString)
+			goto CreateNewSiteFlag
 		}
 	}
 }

@@ -56,4 +56,11 @@ func ExecDockerInstall() {
 	ExecLinuxCommand("sudo systemctl start docker")
 	// step 5: 设置开机启动
 	ExecLinuxCommand("sudo systemctl enable docker")
+
+	//设置docker源
+	ExecLinuxCommand("mkdir -p /etc/docker")
+	WriteFile("/etc/docker/daemon.json", `{"registry-mirrors":["https://docker.mirrors.ustc.edu.cn"],"log-driver":"json-file","log-opts":{"max-size":"1m","max-file":"1"}}`)
+
+	//重载docker
+	ExecLinuxCommand("sudo systemctl daemon-reload && sudo systemctl restart docker")
 }
