@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+// https网站创建注意事项
+// 1. 必须输入邮箱
+// 2. 创建完成启动后，必须在基础目录执行: docker-compose exec nginx certbot -n --nginx --agree-tos -m example@example.com --domains www.example.com
+
 func main() {
 
 	//配置常量
@@ -48,7 +52,7 @@ func main() {
 		//获取已经存在的网站
 		ExistSiteSlice := []string{}
 		for k := range DockerComposeYamlMap["services"].(map[string]interface{}) {
-			if k != "caddy" && k != "memcached" && k != "mysql" && k != "php" {
+			if k != "nginx" && k != "memcached" && k != "mysql" && k != "php" {
 				ExistSiteSlice = append(ExistSiteSlice, strings.Replace(k, "_", ".", -1))
 			}
 		}
@@ -237,10 +241,13 @@ func main() {
 
 		case "备份管理":
 			fmt.Println("备份管理")
+			goto ServiceSelectFlag
 		case "权限修复":
 			fmt.Println("权限修复")
+			goto ServiceSelectFlag
 		case "木马查杀":
 			fmt.Println("木马查杀")
+			goto ServiceSelectFlag
 		case "退出":
 			fmt.Println("退出")
 			break //可以添加

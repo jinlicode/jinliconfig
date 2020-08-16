@@ -1,7 +1,7 @@
 package Template
 
-func TemplateCaddyHttps() string {
-	TemplateCaddyFileHttps := `
+func TemplateNginxHttps() string {
+	TemplateNginxFileHttps := `
 server {
     listen                  443 ssl http2;
     server_name             www.example.com;
@@ -15,8 +15,16 @@ server {
     # security
     include                 /etc/nginx/jinli_nginx_base_config/security.conf;
 
+    # 配置Nginx支持最大上传文件
+    client_max_body_size 200m;
+
     # index.php
     index                   index.php;
+
+    # 日志配置
+    access_log /var/log/nginx/www_example_com_access.log;
+    error_log /var/log/nginx/www_example_com_error.log;
+
 
     # rewrite
 
@@ -42,12 +50,12 @@ server {
 }
 `
 
-	return TemplateCaddyFileHttps
+	return TemplateNginxFileHttps
 
 }
 
-func TemplateCaddyHttp() string {
-	TemplateCaddyFileHttp := `
+func TemplateNginxHttp() string {
+	TemplateNginxFileHttp := `
 server {
     listen                  80;
     server_name             www.example.com;
@@ -57,8 +65,15 @@ server {
     # security
     include                 /etc/nginx/jinli_nginx_base_config/security.conf;
 
+    # 配置Nginx支持最大上传文件
+    client_max_body_size 200m;
+
     # index.php
     index                   index.php;
+
+    # 日志配置
+    access_log /var/log/nginx/www_example_com_access.log;
+    error_log /var/log/nginx/www_example_com_error.log;
 
     # rewrite
 
@@ -73,11 +88,11 @@ server {
 }
 `
 
-	return TemplateCaddyFileHttp
+	return TemplateNginxFileHttp
 
 }
 
-func TemplateCaddyRewriteThinkphp() string {
+func TemplateNginxRewriteThinkphp() string {
 	RewriteThinkphp := `
 	location / {
 	try_files $uri $uri/ /index.php$uri;
@@ -86,7 +101,7 @@ func TemplateCaddyRewriteThinkphp() string {
 	return RewriteThinkphp
 }
 
-func TemplateCaddyRewriteDiscuz() string {
+func TemplateNginxRewriteDiscuz() string {
 	RewriteDiscuz := `
 	location /{
 		rewrite ^([^\.]*)/topic-(.+)\.html$ $1/portal.php?mod=topic&topic=$2 last;

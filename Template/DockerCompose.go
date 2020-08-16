@@ -11,28 +11,30 @@ networks:
 `
 	return NetWorks
 }
-func DockerComposeCaddy() string {
-	Caddy := `
-	caddy:
-    image: caddy:alpine
+func DockerComposeNginx() string {
+	Nginx := `
+  nginx:
+    image: jinlicode/nginx:v1
     ports:
         - "80:80"
         - "443:443"
     volumes:
-        - ./config/caddy/Caddyfile:/etc/caddy/Caddyfile
-        - ./config/caddy/cert:/root/caddy
-        - ./code:/var/www/html
-        - ./log/caddy/:/var/log/
+        - ./config/nginx/conf/:/etc/nginx/conf.d/
+        - ./code:/var/www/test1.jinli.plus
+        - ./log/nginx/:/var/log/nginx
+        - ./config/cert/:/etc/letsencrypt/
     restart: always
     environment:
-        - XDG_DATA_HOME=/root
-        - ACME_AGREE=true
+        # - KEYSIZE="4096"
+        # - KEY_ALGO="rsa"
+        - CONTACT_EMAIL="maniac.cn@gmail.com"
         - TZ=Asia/Shanghai
+        #- XDG_DATA_HOME=/root
     networks:
       discuz:
         ipv4_address: 10.99.1.2
 	`
-	return Caddy
+	return Nginx
 }
 
 func DockerComposePhp() string {
@@ -51,7 +53,7 @@ func DockerComposePhp() string {
         - TZ=Asia/Shanghai
     depends_on:
         - mysql
-        - caddy
+        - nginx
     networks:
       discuz:
         ipv4_address: 10.99.1.3
@@ -94,7 +96,3 @@ func DockerComposeMemcached() string {
   `
 	return Memcached
 }
-
-// func DockerComposeRedis() string {
-
-// }
