@@ -67,7 +67,7 @@ func main() {
 
 		//服务选择主菜单
 	ServiceSelectFlag:
-		ServiceSelect := class.ConsoleOptionsSelect("请选择您需要的服务", []string{"网站服务", "备份管理", "退出"}, "请输入选项")
+		ServiceSelect := class.ConsoleOptionsSelect("请选择您需要的服务", []string{"网站服务", "备份管理", "权限修复", "木马查杀", "退出"}, "请输入选项")
 		switch ServiceSelect {
 		case "网站服务":
 			//网站服务选择主菜单
@@ -237,6 +237,8 @@ func main() {
 
 		case "备份管理":
 			fmt.Println("备份管理")
+		case "权限修复":
+			fmt.Println("权限修复")
 		case "木马查杀":
 			fmt.Println("木马查杀")
 		case "退出":
