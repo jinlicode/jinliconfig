@@ -43,9 +43,17 @@ func main() {
 		`
 	fmt.Println(Welcome)
 
-	//检测是否安装了docker
-
-	//如果已经安装 提示他是否卸载
+	//检测安装的docker是否符合运行环境要求
+	DockerClaim := class.ChkDokcerInstall()
+	//如果不符合提示重装
+	if DockerClaim != true {
+		DockerReInstall := class.ConsoleUserConfirm("由于检测到您的系统不符合使用版本，需要对您的系统重新安装基础运行环境\n1. 会卸载docker\n2.重新安装符合版本的docker\n3.dockers原始文件目录/etc/docker改为/etc/docker_bak\n4.docker原始目录/var/lib/docker改为/var/lib/docker_bak\n 请问您是否同意重新安装docker？")
+		if DockerReInstall {
+			class.ExecDockerInstall()
+		} else {
+			os.Exit(3)
+		}
+	}
 
 CreateNewSiteFlag:
 
