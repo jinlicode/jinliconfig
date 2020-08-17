@@ -1,6 +1,9 @@
 package class
 
-import "math/rand"
+import (
+	"math/rand"
+	"time"
+)
 
 // RandomString 返回随机字符串
 func RandomString(n int, allowedChars ...[]rune) string {
@@ -12,6 +15,8 @@ func RandomString(n int, allowedChars ...[]rune) string {
 	} else {
 		letters = allowedChars[0]
 	}
+
+	rand.Seed(time.Now().UnixNano())
 
 	b := make([]rune, n)
 	for i := range b {
