@@ -310,7 +310,14 @@ CreateNewSiteFlag:
 
 			DockerComposeVersion := Template.DockerComposeVersion()
 			DockerComposeNginxMap := class.YamlFileToMap(Template.DockerComposeNginx())
-			DockerComposeMysqlMap := class.YamlFileToMap(Template.DockerComposeMysql())
+			DockerComposeMysqlString := Template.DockerComposeMysql()
+
+			//自动生成mysql密码
+			mysqlRandPassword := class.RandomString(16)
+			//替换compose中的密码为随机密码
+			DockerComposeMysqlString = strings.Replace(DockerComposeMysqlString, "MYSQL_ROOT_PASSWORD: root", "MYSQL_ROOT_PASSWORD: "+mysqlRandPassword, 1)
+			DockerComposeMysqlMap := class.YamlFileToMap(DockerComposeMysqlString)
+
 			DockerComposeNetWorksMap := class.YamlFileToMap(Template.DockerComposeNetWorks())
 
 			DockerComposeMap := make(map[string]interface{})
@@ -323,6 +330,14 @@ CreateNewSiteFlag:
 			//写入yaml文件 跳转到新建网站
 			DockerComposeYamlString, _ := class.MapToYaml(DockerComposeMap)
 			class.WriteFile(BASEPATH+"docker-compose.yaml", DockerComposeYamlString)
+
+			//创建mysql my.cnf
+			class.WriteFile(BASEPATH+"config/mysql/my.cnf", Template.MysqlCnf())
+
+			//启动docker-compose
+			fmt.Println("服务正在启动中，预计需要10分钟，请您耐心稍等......")
+			class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose up -d")
+
 			goto CreateNewSiteFlag
 		}
 	}
