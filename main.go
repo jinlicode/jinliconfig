@@ -128,7 +128,18 @@ CreateNewSiteFlag:
 						}
 					}
 				}
-				NewSitePhpVersion := class.ConsoleOptionsSelect("请选择您需要的php版本", []string{"5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0"}, "请输入选项")
+				NewSitePhpVersion := class.ConsoleOptionsSelect("请选择您需要的php版本, sec版本为安全版本", []string{
+					"5.6",
+					"5.6-sec",
+					"7.0",
+					"7.0-sec",
+					"7.1",
+					"7.1-sec",
+					"7.2",
+					"7.2-sec",
+					"7.3",
+					"7.3-sec",
+				}, "请输入选项")
 
 				//再回显一次输入的内容判断是否真的要开始安装
 				LastReConfirm := class.ConsoleUserConfirm("\n域名：[" + NewSiteDomain + "]\n是否启用https：[" + NewSiteHTTPS + "]\nphp版本：[" + NewSitePhpVersion + "]\n确定是否立即安装")
@@ -137,6 +148,8 @@ CreateNewSiteFlag:
 					os.Exit(3)
 				}
 
+				fmt.Println("新网站正在建设中，请您稍等......")
+
 				//获取php 镜像模版
 				SitePhpVersionCompose := Template.DockerComposePhp()
 
@@ -144,10 +157,10 @@ CreateNewSiteFlag:
 				newDomain = strings.Replace(newDomain, ".", "_", -1)
 
 				//替换域名
-				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "- ./code:", "- ./code/"+newDomain+":", 1)
+				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "www_example_com", newDomain, 1)
 
 				//替换php版本
-				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "image: jinlicode/discuz_docker:latest", "image: jinlicode/discuz_docker:"+NewSitePhpVersion, 1)
+				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "image: jinlicode/php:latest", "image: jinlicode/php:v"+NewSitePhpVersion, 1)
 
 				//生成子map
 				NewSitePhpVersionComposeMap := class.YamlFileToMap(SitePhpVersionCompose)
@@ -156,17 +169,36 @@ CreateNewSiteFlag:
 				DockerComposeYamlMap["services"].(map[string]interface{})[newDomain] = NewSitePhpVersionComposeMap
 
 				//自动创建以网站名字命名的程序目录
-				class.ExecLinuxCommand("mkdir " + BASEPATH + "/code/" + newDomain)
+				class.ExecLinuxCommand("mkdir " + BASEPATH + "code/" + newDomain)
+				class.ExecLinuxCommand("mkdir " + BASEPATH + "config/php/" + newDomain)
 
 				//创建网站的配置文件到对应的config配置文件中
-				class.ExecLinuxCommand("mkdir " + BASEPATH + "/config/php/" + newDomain)
-				class.WriteFile(BASEPATH+"config/php"+newDomain+"/www.conf", Template.PhpWww())
-				class.WriteFile(BASEPATH+"config/php"+newDomain+"/php.ini", Template.PhpIni())
-				class.WriteFile(BASEPATH+"config/php"+newDomain+"/php-fpm.conf", Template.PhpFpm())
+				class.ExecLinuxCommand("mkdir " + BASEPATH + "config/php/" + newDomain)
+				class.WriteFile(BASEPATH+"config/php/"+newDomain+"/www.conf", Template.PhpWww())
+				class.WriteFile(BASEPATH+"config/php/"+newDomain+"/php.ini", Template.PhpIni())
+				class.WriteFile(BASEPATH+"config/php/"+newDomain+"/php-fpm.conf", Template.PhpFpm())
+
+				//创建对应nginx.conf到对应目录
+				if NewSiteHTTPS == "否" {
+					class.WriteFile(BASEPATH+"config/nginx/conf/"+newDomain+".conf", Template.TemplateNginxHttp())
+				} else {
+					class.WriteFile(BASEPATH+"config/nginx/conf/"+newDomain+".conf", Template.TemplateNginxHttps())
+				}
 
 				//写入docker-compose.yaml 文件
 				NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
 				class.WriteFile(BASEPATH+"docker-compose.yaml", NewDockerComposeYamlString)
+
+				//启动新网站服务
+				class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose up -d " + newDomain)
+
+				//显示新网站内容
+				fmt.Println("请将您的网站代码上传至 " + BASEPATH + "code/" + newDomain)
+				fmt.Println("对应网站的mysql用户名： " + newDomain)
+				fmt.Println("对应网站的mysql密码  ： " + newDomain)
+
+				//自动创建数据库 用户名 密码
+
 				// fmt.Println(NewDockerComposeYamlString)
 
 			case WebServiceSelect:
@@ -251,7 +283,7 @@ CreateNewSiteFlag:
 
 					//操作删除工作 删除代码目录  删除  数据库 drop database bbbbbbbb
 					MysqlPassword := DockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"]
-					class.ExecLinuxCommand("rm -rf " + BASEPATH + "/" + MapKey + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + MysqlPassword.(string) + " -e 'drop database " + MapKey + "'\"")
+					class.ExecLinuxCommand("rm -rf " + BASEPATH + MapKey + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + MysqlPassword.(string) + " -e 'drop database " + MapKey + "'\"")
 
 					fmt.Println("删除成功")
 
@@ -299,7 +331,7 @@ CreateNewSiteFlag:
 			class.ExecLinuxCommand("mkdir " + BASEPATH + "code/")
 
 			//创建各配置项目录
-			class.ExecLinuxCommand("mkdir " + BASEPATH + "/config/ && mkdir " + BASEPATH + "/config/cert/ && mkdir " + BASEPATH + "/config/mysql/ && mkdir " + BASEPATH + "/config/nginx/ && mkdir " + BASEPATH + "/config/php/")
+			class.ExecLinuxCommand("mkdir " + BASEPATH + "config/ && mkdir " + BASEPATH + "config/cert/ && mkdir " + BASEPATH + "config/mysql/ && mkdir " + BASEPATH + "config/nginx/ && mkdir " + BASEPATH + "config/php/")
 
 			//设置代码目录为 10000,10000
 			class.ExecLinuxCommand("chown -R 10000:10000 " + BASEPATH + "code/")
@@ -335,8 +367,15 @@ CreateNewSiteFlag:
 			class.WriteFile(BASEPATH+"config/mysql/my.cnf", Template.MysqlCnf())
 
 			//启动docker-compose
-			fmt.Println("服务正在启动中，预计需要10分钟，请您耐心稍等......")
+			fmt.Println("服务正在启动中，预计需要10分钟，请您耐心等待......")
 			class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose up -d")
+
+			//回显数据库密码
+			fmt.Println("\n====================")
+			fmt.Println("mysql 数据库信息")
+			fmt.Println("用户名：root")
+			fmt.Println("密码  " + mysqlRandPassword)
+			fmt.Println("====================")
 
 			goto CreateNewSiteFlag
 		}
