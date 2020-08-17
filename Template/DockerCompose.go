@@ -42,13 +42,13 @@ func DockerComposeNginx() string {
 
 func DockerComposePhp() string {
 	Php := `
-    image: jinlicode/discuz_docker:latest
+    image: jinlicode/php:latest
     user: 10000:10000
     volumes:
-        - ./code:/var/www/html
-        - ./config/php/php.ini:/usr/local/etc/php/php.ini
-        - ./config/php/php-fpm.conf:/usr/local/etc/php-fpm.conf
-        - ./config/php/www.conf:/usr/local/etc/php-fpm.d/www.conf
+        - ./code/www_example_com:/var/www/html
+        - ./config/php/www_example_com/php.ini:/usr/local/etc/php/php.ini
+        - ./config/php/www_example_com/php-fpm.conf:/usr/local/etc/php-fpm.conf
+        - ./config/php/www_example_com/www.conf:/usr/local/etc/php-fpm.d/www.conf
     restart: always
     expose:
         - "9000"

@@ -1,11 +1,12 @@
 package Template
 
 func TemplateNginxHttps() string {
+
 	TemplateNginxFileHttps := `
 server {
     listen                  443 ssl http2;
     server_name             www.example.com;
-    set                     $base /var/www/www.example.com;
+    set                     $base /var/www/www_example_com;
     root                    $base;
 
     # 这里配上之前我们生成的自签名证书，否则会报错
@@ -55,11 +56,12 @@ server {
 }
 
 func TemplateNginxHttp() string {
+
 	TemplateNginxFileHttp := `
 server {
     listen                  80;
     server_name             www.example.com;
-    set                     $base /var/www/www.example.com;
+    set                     $base /var/www/www_example_com;
     root                    $base;
 
     # security
