@@ -9,9 +9,9 @@ func DockerComposeNetWorks() string {
 	NetWorks := `
 discuz:
   ipam:
-  driver: default
-  config:
-    - subnet: "10.99.1.0/16"
+    driver: default
+    config:
+      - subnet: "10.99.1.0/16"
 `
 	return NetWorks
 }
@@ -35,7 +35,7 @@ func DockerComposeNginx() string {
         #- XDG_DATA_HOME=/root
     networks:
       discuz:
-        ipv4_address: 10.99.1.1
+        ipv4_address: 10.99.1.2
 `
 	return Nginx
 }
@@ -59,7 +59,7 @@ func DockerComposePhp() string {
         - nginx
     networks:
       discuz:
-        ipv4_address: 10.99.2.1
+        ipv4_address: 10.99.2.2
 `
 	return Php
 }
@@ -75,12 +75,12 @@ func DockerComposeMysql() string {
     expose:
       - "3306"
     environment:
-      MYSQL_ROOT_PASSWORD: discuz
-      MYSQL_DATABASE: discuz
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: jinli
       TZ: Asia/Shanghai
     networks:
       discuz:
-        ipv4_address: 10.99.3.1
+        ipv4_address: 10.99.3.2
   `
 	return Mysql
 }
@@ -94,7 +94,7 @@ func DockerComposeMemcached() string {
       - MEMCACHED_CACHE_SIZE=64
     networks:
       discuz:
-        ipv4_address: 10.99.4.1
+        ipv4_address: 10.99.4.2
   `
 	return Memcached
 }
