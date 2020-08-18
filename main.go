@@ -223,12 +223,21 @@ CreateNewSiteFlag:
 				//重启nginx 配置
 				class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose exec nginx nginx -s reload")
 
-				//显示新网站内容
-				fmt.Println("请将您的网站代码上传至 " + BASEPATH + "code/" + newDomain)
-				fmt.Println("对应网站的mysql用户名： " + newDomain)
-				fmt.Println("对应网站的mysql密码  ： " + newDomain)
+				//自动创建网站对应mysql数据
+				MysqlRootPassword := DockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"]
+				MysqlRootPasswordString := MysqlRootPassword.(string)
+
+				//获取随机密码
+				mysqlSiteRandPassword := class.RandomString(16)
 
 				//自动创建数据库 用户名 密码
+				class.CreateDatabase(BASEPATH, MysqlRootPasswordString, newDomain, newDomain, mysqlSiteRandPassword)
+
+				//显示新网站内容
+				fmt.Println("请将您的网站代码上传至 " + BASEPATH + "code/" + newDomain)
+				fmt.Println("数据库名称：" + newDomain)
+				fmt.Println("mysql用户名：" + newDomain)
+				fmt.Println("mysql密码：" + mysqlSiteRandPassword)
 
 				// fmt.Println(NewDockerComposeYamlString)
 

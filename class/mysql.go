@@ -61,3 +61,26 @@ func MysqlGetDatabases(MysqlHost string, MysqlUser string, MysqlPassword string)
 	m3 := mapToSlice(m2)
 	return m3
 }
+
+//CreateDatabase 创建数据库并创建对应的用户
+func CreateDatabase(basepath string, rootPass string, username string, dataName string, dataPwd string) {
+	mysqlCommand := ""
+
+	//创建数据库
+	mysqlCommand = `create database ` + dataName + ` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci`
+	ExecLinuxCommand("cd " + basepath + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + rootPass + " -e '" + mysqlCommand + "'\"")
+	//先删用户
+	mysqlCommand = "drop user " + username + "@localhost"
+	ExecLinuxCommand("cd " + basepath + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + rootPass + " -e '" + mysqlCommand + "'\"")
+	//先删用户
+	mysqlCommand = "drop user " + username + "@127.0.0.1"
+	ExecLinuxCommand("cd " + basepath + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + rootPass + " -e '" + mysqlCommand + "'\"")
+	//创建内容
+	mysqlCommand = `grant all privileges on ` + dataName + `.* to ` + username + `@localhost identified by \"` + dataPwd + `\"`
+	ExecLinuxCommand("cd " + basepath + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + rootPass + " -e '" + mysqlCommand + "'\"")
+
+	mysqlCommand = `grant all privileges on ` + dataName + `.* to ` + username + `@127.0.0.1 identified by \"` + dataPwd + `\"`
+	ExecLinuxCommand("cd " + basepath + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + rootPass + " -e '" + mysqlCommand + "'\"")
+
+	ExecLinuxCommand("cd " + basepath + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + rootPass + " -e 'flush privileges'\"")
+}
