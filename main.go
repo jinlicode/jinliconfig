@@ -157,7 +157,7 @@ CreateNewSiteFlag:
 				newDomain = strings.Replace(newDomain, ".", "_", -1)
 
 				//替换域名
-				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "www_example_com", newDomain, 1)
+				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "www_example_com", newDomain, -1)
 
 				//替换php版本
 				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "image: jinlicode/php:latest", "image: jinlicode/php:v"+NewSitePhpVersion, 1)
@@ -172,6 +172,10 @@ CreateNewSiteFlag:
 				class.ExecLinuxCommand("mkdir " + BASEPATH + "code/" + newDomain)
 				class.ExecLinuxCommand("mkdir " + BASEPATH + "config/php/" + newDomain)
 
+				//写入404以及index文件到置顶目录
+				class.WriteFile(BASEPATH+"code/"+newDomain+"/index.html", Template.HTMLIndex())
+				class.WriteFile(BASEPATH+"code/"+newDomain+"/404.html", Template.HTML404())
+
 				//创建网站的配置文件到对应的config配置文件中
 				class.ExecLinuxCommand("mkdir " + BASEPATH + "config/php/" + newDomain)
 				class.WriteFile(BASEPATH+"config/php/"+newDomain+"/www.conf", Template.PhpWww())
@@ -180,9 +184,17 @@ CreateNewSiteFlag:
 
 				//创建对应nginx.conf到对应目录
 				if NewSiteHTTPS == "否" {
-					class.WriteFile(BASEPATH+"config/nginx/conf/"+newDomain+".conf", Template.TemplateNginxHttp())
+					TemplateNginxHttpString := Template.TemplateNginxHttp()
+					TemplateNginxHttpString = strings.Replace(TemplateNginxHttpString, "www_example_com", newDomain, -1)
+					TemplateNginxHttpString = strings.Replace(TemplateNginxHttpString, "www.example.com", NewSiteDomain, -1)
+					TemplateNginxHttpString = strings.Replace(TemplateNginxHttpString, "php:9000", newDomain+":9000", -1)
+					class.WriteFile(BASEPATH+"config/nginx/conf/"+newDomain+".conf", TemplateNginxHttpString)
 				} else {
-					class.WriteFile(BASEPATH+"config/nginx/conf/"+newDomain+".conf", Template.TemplateNginxHttps())
+					TemplateNginxHttpsString := Template.TemplateNginxHttps()
+					TemplateNginxHttpsString = strings.Replace(TemplateNginxHttpsString, "www_example_com", newDomain, -1)
+					TemplateNginxHttpsString = strings.Replace(TemplateNginxHttpsString, "www.example.com", NewSiteDomain, -1)
+					TemplateNginxHttpsString = strings.Replace(TemplateNginxHttpsString, "php:9000", newDomain+":9000", -1)
+					class.WriteFile(BASEPATH+"config/nginx/conf/"+newDomain+".conf", TemplateNginxHttpsString)
 				}
 
 				//写入docker-compose.yaml 文件
@@ -191,6 +203,8 @@ CreateNewSiteFlag:
 
 				//启动新网站服务
 				class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose up -d " + newDomain)
+				//重启nginx 配置
+				class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose exec nginx nginx -s reload")
 
 				//显示新网站内容
 				fmt.Println("请将您的网站代码上传至 " + BASEPATH + "code/" + newDomain)
