@@ -23,7 +23,7 @@ func DockerComposeNginx() string {
         - "443:443"
     volumes:
         - ./config/nginx/conf/:/etc/nginx/conf.d/
-        - ./code:/var/www/test1.jinli.plus
+        - ./code:/var/www
         - ./log/nginx/:/var/log/nginx
         - ./config/cert/:/etc/letsencrypt/
     restart: always

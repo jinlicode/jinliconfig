@@ -20,7 +20,7 @@ server {
     client_max_body_size 200m;
 
     # index.php
-    index                   index.php;
+    index                   index.php index.html index.htm;
 
     # 日志配置
     access_log /var/log/nginx/www_example_com_access.log;
@@ -71,7 +71,7 @@ server {
     client_max_body_size 200m;
 
     # index.php
-    index                   index.php;
+    index                   index.php index.html index.htm;
 
     # 日志配置
     access_log /var/log/nginx/www_example_com_access.log;
