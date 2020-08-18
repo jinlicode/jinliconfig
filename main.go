@@ -6,6 +6,7 @@ import (
 	"jinliconfig/class"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
@@ -65,9 +66,22 @@ CreateNewSiteFlag:
 
 		//获取已经存在的网站
 		ExistSiteSlice := []string{}
-		for k := range DockerComposeYamlMap["services"].(map[string]interface{}) {
+
+		//获取最大内网数
+		SiteNetMax := 2
+		for k, v := range DockerComposeYamlMap["services"].(map[string]interface{}) {
 			if k != "nginx" && k != "memcached" && k != "mysql" && k != "php" {
 				ExistSiteSlice = append(ExistSiteSlice, strings.Replace(k, "_", ".", -1))
+
+				//获取内网最大数字
+				max := strings.Split(v.(map[string]interface{})["networks"].(map[string]interface{})["discuz"].(map[string]interface{})["ipv4_address"].(string), ".")
+				maxNumString := max[3]
+
+				maxNum, err := strconv.Atoi(maxNumString)
+
+				if err == nil && SiteNetMax < maxNum {
+					SiteNetMax = maxNum
+				}
 			}
 		}
 		fmt.Println(ExistSiteSlice)
@@ -159,6 +173,9 @@ CreateNewSiteFlag:
 				//替换域名
 				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "www_example_com", newDomain, -1)
 
+				//替换内网ip
+				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "ipv4_address: 10.99.2.2", "ipv4_address: 10.99.2."+strconv.Itoa(SiteNetMax+1), -1)
+
 				//替换php版本
 				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "image: jinlicode/php:latest", "image: jinlicode/php:v"+NewSitePhpVersion, 1)
 
@@ -184,17 +201,17 @@ CreateNewSiteFlag:
 
 				//创建对应nginx.conf到对应目录
 				if NewSiteHTTPS == "否" {
-					TemplateNginxHttpString := Template.TemplateNginxHttp()
-					TemplateNginxHttpString = strings.Replace(TemplateNginxHttpString, "www_example_com", newDomain, -1)
-					TemplateNginxHttpString = strings.Replace(TemplateNginxHttpString, "www.example.com", NewSiteDomain, -1)
-					TemplateNginxHttpString = strings.Replace(TemplateNginxHttpString, "php:9000", newDomain+":9000", -1)
-					class.WriteFile(BASEPATH+"config/nginx/conf/"+newDomain+".conf", TemplateNginxHttpString)
+					TemplateNginxHTTPString := Template.TemplateNginxHttp()
+					TemplateNginxHTTPString = strings.Replace(TemplateNginxHTTPString, "www_example_com", newDomain, -1)
+					TemplateNginxHTTPString = strings.Replace(TemplateNginxHTTPString, "www.example.com", NewSiteDomain, -1)
+					TemplateNginxHTTPString = strings.Replace(TemplateNginxHTTPString, "php:9000", newDomain+":9000", -1)
+					class.WriteFile(BASEPATH+"config/nginx/conf/"+newDomain+".conf", TemplateNginxHTTPString)
 				} else {
-					TemplateNginxHttpsString := Template.TemplateNginxHttps()
-					TemplateNginxHttpsString = strings.Replace(TemplateNginxHttpsString, "www_example_com", newDomain, -1)
-					TemplateNginxHttpsString = strings.Replace(TemplateNginxHttpsString, "www.example.com", NewSiteDomain, -1)
-					TemplateNginxHttpsString = strings.Replace(TemplateNginxHttpsString, "php:9000", newDomain+":9000", -1)
-					class.WriteFile(BASEPATH+"config/nginx/conf/"+newDomain+".conf", TemplateNginxHttpsString)
+					TemplateNginxHTTPSString := Template.TemplateNginxHttps()
+					TemplateNginxHTTPSString = strings.Replace(TemplateNginxHTTPSString, "www_example_com", newDomain, -1)
+					TemplateNginxHTTPSString = strings.Replace(TemplateNginxHTTPSString, "www.example.com", NewSiteDomain, -1)
+					TemplateNginxHTTPSString = strings.Replace(TemplateNginxHTTPSString, "php:9000", newDomain+":9000", -1)
+					class.WriteFile(BASEPATH+"config/nginx/conf/"+newDomain+".conf", TemplateNginxHTTPSString)
 				}
 
 				//写入docker-compose.yaml 文件
