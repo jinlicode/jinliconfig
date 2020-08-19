@@ -123,18 +123,41 @@ CreateNewSiteFlag:
 				}
 
 				NewSiteHTTPS := class.ConsoleOptionsSelect("是否使用HTTPS", []string{"是", "否"}, "请输入选项")
+				NewSiteSSLHave := ""
+				NewSiteSSLEmail := ""
+				CertCERInput := ""
+				CertKEYInput := ""
+				NeedToReloadSSL := false
 				if NewSiteHTTPS == "否" {
 					fmt.Println("您选择了没有https证书，如果选择错误请按Ctrl+C结束当前进程")
 				} else {
-					NewSiteSSLHave := class.ConsoleOptionsSelect("您是否有自己的证书", []string{"是", "否"}, "请输入选项")
+					NewSiteSSLHave = "否"
+					// NewSiteSSLHave = class.ConsoleOptionsSelect("您是否有自己的证书", []string{"是", "否"}, "请输入选项")
 					if NewSiteSSLHave == "否" {
-						fmt.Println("您选择了没有https证书，我们将会自动为您创建HTTPS证书，请您先一步解析域名到您的服务器上，如果使用CDN请参考官方帮助文档：https://xxxxxxxxxxxxxxx")
+						// fmt.Println("您选择了没有https证书，我们将会自动为您创建HTTPS证书，请您先一步解析域名到您的服务器上，如果使用CDN请参考官方帮助文档：https://xxxxxxxxxxxxxxx")
+
+						// ReInputSiteEmailFlag:
+						//开始输入邮箱
+						// NewSiteSSLEmail = class.ConsoleUserInput("请输入您的邮箱地址，此地址为了自动申请证书所用：")
+						// NewSiteSSLEmail = strings.TrimSpace(NewSiteSSLEmail)
+
+						//检测邮箱是否输入正确
+						// if !class.CheckEmail(NewSiteSSLEmail) {
+						// 	fmt.Println("您输入的邮箱不正确，请重新输入！")
+						// 	goto ReInputSiteEmailFlag
+						// }
+
+						// 	certPEMBlock, _ := ioutil.ReadFile("/var/discuz_deploy/config/cert/live/test1.jinli.plus/cert.pem")
+						//     certDERBlockde, _ := pem.Decode(certPEMBlock)
+						//     x509Cert, _ := x509.ParseCertificate(certDERBlockde.Bytes)
+						// 	println(x509Cert.NotAfter.Format("2006-01-02 15:04:05"))
+
 					} else {
 						fmt.Println("请您准备好证书需要用到的两个文件，如果有选择请选择下载nginx使用版本，马上您会被要求粘贴两个文件内容")
 						NewSiteSSLHaveConfirm := class.ConsoleUserConfirm("您是否已经准备好证书，如果准备好请选择")
 						if NewSiteSSLHaveConfirm == true {
-							CertCERInput := class.ConsoleUserText("输入证书CER文件内容，写入完成请按两次回车即可")
-							CertKEYInput := class.ConsoleUserText("输入证书KEY文件内容，写入完成请按两次回车即可")
+							CertCERInput = class.ConsoleUserText("输入证书CER文件内容，写入完成请按两次回车即可")
+							CertKEYInput = class.ConsoleUserText("输入证书KEY文件内容，写入完成请按两次回车即可")
 							fmt.Println(CertCERInput)
 							fmt.Println(CertKEYInput)
 						} else {
@@ -207,11 +230,27 @@ CreateNewSiteFlag:
 					TemplateNginxHTTPString = strings.Replace(TemplateNginxHTTPString, "php:9000", newDomain+":9000", -1)
 					class.WriteFile(BASEPATH+"config/nginx/conf/"+newDomain+".conf", TemplateNginxHTTPString)
 				} else {
+
 					TemplateNginxHTTPSString := Template.TemplateNginxHttps()
 					TemplateNginxHTTPSString = strings.Replace(TemplateNginxHTTPSString, "www_example_com", newDomain, -1)
 					TemplateNginxHTTPSString = strings.Replace(TemplateNginxHTTPSString, "www.example.com", NewSiteDomain, -1)
 					TemplateNginxHTTPSString = strings.Replace(TemplateNginxHTTPSString, "php:9000", newDomain+":9000", -1)
-					class.WriteFile(BASEPATH+"config/nginx/conf/"+newDomain+".conf", TemplateNginxHTTPSString)
+
+					//如果是手动输入 保存cert.key
+					if CertCERInput != "" && CertKEYInput != "" {
+						class.WriteFile(BASEPATH+"config/cert/"+newDomain+"/cert.crt", CertCERInput)
+						class.WriteFile(BASEPATH+"config/cert/"+newDomain+"/cert.key", CertKEYInput)
+
+						//更改配置
+						TemplateNginxHTTPSString = strings.Replace(TemplateNginxHTTPSString, "ssl_certificate /etc/ssl/default.crt", "ssl_certificate /etc/letsencrypt/cert.crt", -1)
+						TemplateNginxHTTPSString = strings.Replace(TemplateNginxHTTPSString, "ssl_certificate_key /etc/ssl/default.crt", "ssl_certificate_key /etc/letsencrypt/cert.key", -1)
+						class.WriteFile(BASEPATH+"config/nginx/conf/"+newDomain+".conf", TemplateNginxHTTPSString)
+
+					} else {
+						NeedToReloadSSL = true
+						class.WriteFile(BASEPATH+"config/nginx/conf/"+newDomain+".conf", TemplateNginxHTTPSString)
+					}
+
 				}
 
 				//写入docker-compose.yaml 文件
@@ -222,6 +261,11 @@ CreateNewSiteFlag:
 				class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose up -d " + newDomain)
 				//重启nginx 配置
 				class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose exec nginx nginx -s reload")
+
+				//重启命令
+				if NeedToReloadSSL {
+					class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose exec nginx certbot -n --nginx --agree-tos -m " + NewSiteSSLEmail + " --domains " + NewSiteDomain)
+				}
 
 				//自动创建网站对应mysql数据
 				MysqlRootPassword := DockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"]
