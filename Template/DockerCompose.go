@@ -28,11 +28,8 @@ func DockerComposeNginx() string {
         - ./config/cert/:/etc/letsencrypt/
     restart: always
     environment:
-        # - KEYSIZE="4096"
-        # - KEY_ALGO="rsa"
-        - CONTACT_EMAIL="maniac.cn@gmail.com"
         - TZ=Asia/Shanghai
-        #- XDG_DATA_HOME=/root
+        - JINLIVER=1.1
     networks:
       discuz:
         ipv4_address: 10.99.1.2
@@ -45,7 +42,7 @@ func DockerComposePhp() string {
     image: jinlicode/php:latest
     user: 10000:10000
     volumes:
-        - ./code/www_example_com:/var/www/html
+        - ./code/www_example_com:/var/www/www_example_com
         - ./config/php/www_example_com/php.ini:/usr/local/etc/php/php.ini
         - ./config/php/www_example_com/php-fpm.conf:/usr/local/etc/php-fpm.conf
         - ./config/php/www_example_com/www.conf:/usr/local/etc/php-fpm.d/www.conf
