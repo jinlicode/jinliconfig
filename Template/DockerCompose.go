@@ -73,7 +73,6 @@ func DockerComposeMysql() string {
       - "3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: jinli
       TZ: Asia/Shanghai
     networks:
       discuz:

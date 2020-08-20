@@ -19,7 +19,7 @@ func main() {
 	//配置常量
 	const (
 		//基础目录配置
-		BASEPATH = "/var/discuz_deploy/"
+		BASEPATH = "/var/jinli/"
 	)
 	//检查是否为root启动
 	if os.Getuid() != 0 {
