@@ -200,7 +200,7 @@ CreateNewSiteFlag:
 				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "ipv4_address: 10.99.2.2", "ipv4_address: 10.99.2."+strconv.Itoa(SiteNetMax+1), -1)
 
 				//替换php版本
-				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "image: jinlicode/php:latest", "image: jinlicode/php:v"+NewSitePhpVersion, 1)
+				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "jinlicode/php:latest", "jinlicode/php:v"+NewSitePhpVersion, 1)
 
 				//生成子map
 				NewSitePhpVersionComposeMap := class.YamlFileToMap(SitePhpVersionCompose)

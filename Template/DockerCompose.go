@@ -17,7 +17,7 @@ discuz:
 }
 func DockerComposeNginx() string {
 	Nginx := `
-    image: jinlicode/nginx:v1
+    image: registry.cn-beijing.aliyuncs.com/jinlicode/nginx:v1
     ports:
         - "80:80"
         - "443:443"
@@ -39,7 +39,7 @@ func DockerComposeNginx() string {
 
 func DockerComposePhp() string {
 	Php := `
-    image: jinlicode/php:latest
+    image: registry.cn-beijing.aliyuncs.com/jinlicode/php:latest
     user: 10000:10000
     volumes:
         - ./code/www_example_com:/var/www/www_example_com
@@ -62,7 +62,7 @@ func DockerComposePhp() string {
 }
 func DockerComposeMysql() string {
 	Mysql := `
-    image: mysql:5.7.30
+    image: registry.cn-beijing.aliyuncs.com/jinlicode/mysql
     restart: always
     container_name: mysql
     volumes: 
@@ -84,7 +84,7 @@ func DockerComposeMysql() string {
 func DockerComposeMemcached() string {
 	Memcached := `
   memcached:
-    image: bitnami/memcached:1.6.6
+    image: registry.cn-beijing.aliyuncs.com/bitnami/memcached:1.6.6
     restart: always
     container_name: memcached
     environment:
