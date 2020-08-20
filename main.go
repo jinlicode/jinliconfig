@@ -124,6 +124,17 @@ CreateNewSiteFlag:
 					goto ReInputSiteDomainFlag
 				}
 
+				//域名转下划线
+				newDomain := NewSiteDomain
+				newDomain = strings.Replace(newDomain, ".", "_", -1)
+
+				//检测nginx是否已经存在配置文件
+				if class.CheckFileExist(BASEPATH + "config/nginx/" + newDomain + ".conf") {
+					if class.ConsoleOptionsSelect("您已经存在当前配置文件，如您选择继续，将覆盖配置文件", []string{"是", "否"}, "请输入选项") == "否" {
+						goto ReInputSiteDomainFlag
+					}
+				}
+
 				NewSiteHTTPS := class.ConsoleOptionsSelect("是否使用HTTPS", []string{"是", "否"}, "请输入选项")
 				NewSiteSSLEmail := ""
 				if NewSiteHTTPS == "否" {
@@ -172,9 +183,6 @@ CreateNewSiteFlag:
 
 				//获取php 镜像模版
 				SitePhpVersionCompose := Template.DockerComposePhp()
-
-				newDomain := NewSiteDomain
-				newDomain = strings.Replace(newDomain, ".", "_", -1)
 
 				//替换域名
 				SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "www_example_com", newDomain, -1)
@@ -315,6 +323,13 @@ CreateNewSiteFlag:
 					//重新写入到yaml
 					NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
 					class.WriteFile(BASEPATH+"docker-compose.yaml", NewDockerComposeYamlString)
+
+					//删除对应的nginx配置
+					class.ExecLinuxCommand("rm " + BASEPATH + "config/nginx/" + MapKey + ".conf")
+
+					//重启nginx配置
+					class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose exec nginx nginx -s reload")
+
 					fmt.Println("删除成功")
 
 				case "删除" + WebServiceSelect + "的网站(删除数据，包含数据库和程序)":
@@ -339,6 +354,12 @@ CreateNewSiteFlag:
 					//操作删除工作 删除代码目录  删除  数据库 drop database bbbbbbbb
 					MysqlPassword := DockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"]
 					class.ExecLinuxCommand("rm -rf " + BASEPATH + MapKey + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + MysqlPassword.(string) + " -e 'drop database " + MapKey + "'\"")
+
+					//删除对应的nginx配置
+					class.ExecLinuxCommand("rm " + BASEPATH + "config/nginx/" + MapKey + ".conf")
+
+					//重启nginx配置
+					class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose exec nginx nginx -s reload")
 
 					fmt.Println("删除成功")
 
