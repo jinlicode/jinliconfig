@@ -76,7 +76,7 @@ CreateNewSiteFlag:
 				ExistSiteSlice = append(ExistSiteSlice, strings.Replace(k, "_", ".", -1))
 
 				//获取内网最大数字
-				max := strings.Split(v.(map[string]interface{})["networks"].(map[string]interface{})["discuz"].(map[string]interface{})["ipv4_address"].(string), ".")
+				max := strings.Split(v.(map[string]interface{})["networks"].(map[string]interface{})["jinli_net"].(map[string]interface{})["ipv4_address"].(string), ".")
 				maxNumString := max[3]
 
 				maxNum, err := strconv.Atoi(maxNumString)
@@ -87,7 +87,7 @@ CreateNewSiteFlag:
 			}
 		}
 		fmt.Println(ExistSiteSlice)
-		// fmt.Printf("%v\n", DockerComposeYamlMap["networks"].(map[string]interface{})["discuz"])
+		// fmt.Printf("%v\n", DockerComposeYamlMap["networks"].(map[string]interface{})["jinli_net"])
 
 		// fmt.Println(DockerComposeYamlRead)
 
