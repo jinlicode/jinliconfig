@@ -11,7 +11,7 @@ server {
 
     # 这里配上之前我们生成的自签名证书，否则会报错
     ssl_certificate /etc/ssl/default.crt; # managed by Certbot
-    ssl_certificate_key /etc/ssl/default.crt; # managed by Certbot
+    ssl_certificate_key /etc/ssl/default.key; # managed by Certbot
 
     # security
     include                 /etc/nginx/jinli_nginx_base_config/security.conf;
