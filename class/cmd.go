@@ -104,6 +104,10 @@ func ChkDokcerInstall() bool {
 
 //卸载docker方法，返回命令提示
 func ChkDokcerRemove() {
+	ExecLinuxCommand("systemctl disable docker.service")
+	ExecLinuxCommand("systemctl stop docker.service")
+	ExecLinuxCommand("rm -rf /var/lib/docker/")
+	ExecLinuxCommand("rm -rf /etc/docker")
 	ExecLinuxCommand("yum remove -y docker*")
 }
 

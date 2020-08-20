@@ -48,8 +48,10 @@ func main() {
 	DockerClaim := class.ChkDokcerInstall()
 	//如果不符合提示重装
 	if DockerClaim != true {
-		DockerReInstall := class.ConsoleUserConfirm("由于检测到您的系统不符合使用版本，需要对您的系统重新安装基础运行环境\n1. 会卸载docker\n2.重新安装符合版本的docker\n3.dockers原始文件目录/etc/docker改为/etc/docker_bak\n4.docker原始目录/var/lib/docker改为/var/lib/docker_bak\n 请问您是否同意重新安装docker？")
+		DockerReInstall := class.ConsoleUserConfirm("由于检测到您的系统不符合使用版本，需要对您的系统重新安装基础运行环境\n1. 会卸载docker\n2.重新安装符合版本的docker\n3.dockers原始文件目录/etc/docker将被删除\n4.docker原始目录/var/lib/docker将被删除\n 请问您是否同意重新安装docker？")
 		if DockerReInstall {
+			//删除老的docker 重新安装特定的docker
+			class.ChkDokcerRemove()
 			class.ExecDockerInstall()
 		} else {
 			os.Exit(3)
