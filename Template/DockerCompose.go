@@ -7,7 +7,7 @@ func DockerComposeVersion() string {
 
 func DockerComposeNetWorks() string {
 	NetWorks := `
-discuz:
+jinli_net:
   ipam:
     driver: default
     config:
@@ -22,7 +22,7 @@ func DockerComposeNginx() string {
         - "80:80"
         - "443:443"
     volumes:
-        - ./config/nginx/conf/:/etc/nginx/conf.d/
+        - ./config/nginx/:/etc/nginx/conf.d/
         - ./code:/var/www
         - ./log/nginx/:/var/log/nginx
         - ./config/cert/:/etc/letsencrypt/
@@ -31,7 +31,7 @@ func DockerComposeNginx() string {
         - TZ=Asia/Shanghai
         - JINLIVER=1.1
     networks:
-      discuz:
+      jinli_net:
         ipv4_address: 10.99.1.2
 `
 	return Nginx
@@ -55,7 +55,7 @@ func DockerComposePhp() string {
         - mysql
         - nginx
     networks:
-      discuz:
+      jinli_net:
         ipv4_address: 10.99.2.2
 `
 	return Php
@@ -75,7 +75,7 @@ func DockerComposeMysql() string {
       MYSQL_ROOT_PASSWORD: root
       TZ: Asia/Shanghai
     networks:
-      discuz:
+      jinli_net:
         ipv4_address: 10.99.3.2
   `
 	return Mysql
@@ -89,7 +89,7 @@ func DockerComposeMemcached() string {
     environment:
       - MEMCACHED_CACHE_SIZE=64
     networks:
-      discuz:
+      jinli_net:
         ipv4_address: 10.99.4.2
   `
 	return Memcached
