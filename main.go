@@ -86,7 +86,7 @@ CreateNewSiteFlag:
 				}
 			}
 		}
-		fmt.Println(ExistSiteSlice)
+		// fmt.Println(ExistSiteSlice)
 		// fmt.Printf("%v\n", DockerComposeYamlMap["networks"].(map[string]interface{})["jinli_net"])
 
 		// fmt.Println(DockerComposeYamlRead)
@@ -127,6 +127,18 @@ CreateNewSiteFlag:
 				//域名转下划线
 				newDomain := NewSiteDomain
 				newDomain = strings.Replace(newDomain, ".", "_", -1)
+
+				//检测是否还有项目目录存在
+				if class.CheckFileExist(BASEPATH + "code/" + newDomain) {
+					if class.ConsoleOptionsSelect("已存在"+newDomain+"目录，是否继续？继续将删除此目录和以此目录为名的数据库", []string{"是", "否"}, "请输入选项") == "否" {
+						goto ReInputSiteDomainFlag
+					} else {
+						//删除对应的项目目录和数据库
+						RootPassword := DockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"]
+						class.ExecLinuxCommand("cd " + BASEPATH + " && rm -rf " + BASEPATH + "code/" + newDomain + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + RootPassword.(string) + " -e 'drop database " + newDomain + "'\"")
+
+					}
+				}
 
 				//检测nginx是否已经存在配置文件
 				if class.CheckFileExist(BASEPATH + "config/nginx/" + newDomain + ".conf") {
