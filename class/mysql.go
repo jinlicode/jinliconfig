@@ -68,15 +68,15 @@ func CreateDatabase(basepath string, rootPass string, username string, dataName 
 
 	//创建数据库
 	mysqlCommand = `create database ` + dataName + ` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci`
-	ExecLinuxCommand("cd " + basepath + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + rootPass + " -e '" + mysqlCommand + "'\"")
+	ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec mysql bash -c "mysql -uroot -p` + rootPass + ` -e '` + mysqlCommand + `'"`)
 
 	//先删用户
-	mysqlCommand = "drop user " + username + "@%"
-	ExecLinuxCommand("cd " + basepath + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + rootPass + " -e '" + mysqlCommand + "'\"")
+	mysqlCommand = `drop user \"` + username + `\"@\"%\"`
+	ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec mysql bash -c "mysql -uroot -p` + rootPass + ` -e '` + mysqlCommand + `'"`)
 
 	//创建用户
-	mysqlCommand = `grant all privileges on ` + dataName + `.* to ` + username + `@% identified by \"` + dataPwd + `\"`
-	ExecLinuxCommand("cd " + basepath + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + rootPass + " -e '" + mysqlCommand + "'\"")
+	mysqlCommand = `grant all privileges on ` + dataName + `.* to \"` + username + `\"@\"%\" identified by \"` + dataPwd + `\"`
+	ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec mysql bash -c "mysql -uroot -p` + rootPass + ` -e '` + mysqlCommand + `'"`)
 
-	ExecLinuxCommand("cd " + basepath + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + rootPass + " -e 'flush privileges'\"")
+	ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec mysql bash -c "mysql -uroot -p` + rootPass + ` -e 'flush privileges'"`)
 }
