@@ -101,7 +101,7 @@ CreateNewSiteFlag:
 
 		//服务选择主菜单
 	ServiceSelectFlag:
-		ServiceSelect := class.ConsoleOptionsSelect("请选择您需要的服务", []string{"网站服务", "备份管理", "权限修复", "木马查杀", "退出"}, "请输入选项")
+		ServiceSelect := class.ConsoleOptionsSelect("请选择您需要的服务", []string{"网站服务", "备份管理", "权限修复", "升级系统镜像", "退出"}, "请输入选项")
 		switch ServiceSelect {
 		case "网站服务":
 			//网站服务选择主菜单
@@ -373,8 +373,9 @@ CreateNewSiteFlag:
 		case "权限修复":
 			fmt.Println("权限修复")
 			goto ServiceSelectFlag
-		case "木马查杀":
-			fmt.Println("木马查杀")
+		case "升级系统镜像":
+			fmt.Println("正在升级系统环境，预计需要5-15分钟.....")
+			class.ExecLinuxCommand("cd " + BASEPATH + " && " + "docker-compose pull" + " && " + "docker-compose restart")
 			goto ServiceSelectFlag
 		case "退出":
 			fmt.Println("退出")
