@@ -257,10 +257,14 @@ CreateNewSiteFlag:
 				class.CreateDatabase(BASEPATH, MysqlRootPasswordString, newDomain, newDomain, mysqlSiteRandPassword)
 
 				//显示新网站内容
-				fmt.Println("请将您的网站代码上传至 " + BASEPATH + "code/" + newDomain)
-				fmt.Println("数据库名称：" + newDomain)
-				fmt.Println("mysql用户名：" + newDomain)
-				fmt.Println("mysql密码：" + mysqlSiteRandPassword)
+
+				fmt.Println("\n=======================您的网站对应信息==========================")
+				fmt.Println("。请将您的网站代码上传至 【" + BASEPATH + "code/" + newDomain + "】 目录")
+				fmt.Println("。数据库服务器地址：mysql")
+				fmt.Println("。数据库库名：" + newDomain)
+				fmt.Println("。数据库用户名：" + newDomain)
+				fmt.Println("。数据库密码：" + mysqlSiteRandPassword)
+				fmt.Println("================================================================")
 
 				// fmt.Println(NewDockerComposeYamlString)
 
@@ -269,6 +273,7 @@ CreateNewSiteFlag:
 					WebServiceSelect + "的" + "nginx配置",
 					WebServiceSelect + "的" + "php配置",
 					WebServiceSelect + "的" + "数据库配置",
+					"重启" + WebServiceSelect + "网站服务",
 					"暂停" + WebServiceSelect + "网站服务",
 					"删除" + WebServiceSelect + "的网站(不删除数据)",
 					"删除" + WebServiceSelect + "的网站(删除数据，包含数据库和程序)",
@@ -291,6 +296,17 @@ CreateNewSiteFlag:
 				case WebServiceSelect + "的" + "数据库配置":
 					fmt.Println(WebServiceSelect + "的" + "数据库配置")
 					fmt.Println(WebServiceSelect + "的" + "php配置")
+				case "重启" + WebServiceSelect + "网站服务":
+					//确定是否需要暂停
+					ReStartSiteConfirm := class.ConsoleUserConfirm("确定重启" + WebServiceSelect + "服务吗？")
+					if ReStartSiteConfirm != true {
+						fmt.Println("已取消操作")
+						goto WebServiceSelectFlag
+					}
+
+					class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose restart " + strings.Replace(WebServiceSelect, ".", "_", -1))
+					fmt.Println("重启成功")
+
 				case "暂停" + WebServiceSelect + "网站服务":
 					//确定是否需要暂停
 					ReStopSiteConfirm := class.ConsoleUserConfirm("确定暂停" + WebServiceSelect + "服务吗？")
@@ -301,9 +317,7 @@ CreateNewSiteFlag:
 
 					//输入命令 暂停容器
 					// fmt.Println("cd " + BASEPATH + " && docker-compose stop " + strings.Replace(WebServiceSelect, ".", "_", -1))
-					cmd := exec.Command("cd " + BASEPATH + " && docker-compose stop " + strings.Replace(WebServiceSelect, ".", "_", -1))
-					cmd.Stdout = os.Stdout
-					cmd.Run()
+					class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose stop " + strings.Replace(WebServiceSelect, ".", "_", -1))
 					fmt.Println("暂停成功")
 
 				case "删除" + WebServiceSelect + "的网站(不删除数据)":
@@ -448,11 +462,11 @@ CreateNewSiteFlag:
 			class.ExecLinuxCommand("cd " + BASEPATH + " && docker-compose up -d")
 
 			//回显数据库密码
-			fmt.Println("\n====================")
-			fmt.Println("mysql 数据库信息")
-			fmt.Println("用户名：root")
-			fmt.Println("密码  " + mysqlRandPassword)
-			fmt.Println("====================")
+			fmt.Println("\n=======================数据库ROOT信息===========================")
+			fmt.Println("。数据库服务器地址：mysql")
+			fmt.Println("。数据库用户名：root")
+			fmt.Println("。数据库密码：" + mysqlRandPassword)
+			fmt.Println("================================================================")
 
 			goto CreateNewSiteFlag
 		}
