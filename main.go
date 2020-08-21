@@ -367,7 +367,7 @@ CreateNewSiteFlag:
 
 					//操作删除工作 删除代码目录  删除  数据库 drop database bbbbbbbb
 					MysqlPassword := DockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"]
-					class.ExecLinuxCommand("cd " + BASEPATH + " && rm -rf " + BASEPATH + MapKey + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + MysqlPassword.(string) + " -e 'drop database " + MapKey + "'\"")
+					class.ExecLinuxCommand("cd " + BASEPATH + " && rm -rf " + BASEPATH + "code/" + MapKey + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + MysqlPassword.(string) + " -e 'drop database " + MapKey + "'\"")
 
 					//删除对应的nginx配置
 					class.ExecLinuxCommand("rm " + BASEPATH + "config/nginx/" + MapKey + ".conf")
