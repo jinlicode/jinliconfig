@@ -112,6 +112,8 @@ func ChkDokcerRemove() {
 
 //ExecDockerInstall 执行安装docker操作
 func ExecDockerInstall() {
+	//安装源
+	ExecLinuxCommand("yum install epel-release -y")
 	//关闭防火墙
 	ExecLinuxCommand("systemctl stop firewalld.service && systemctl disable firewalld.service && setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config")
 	// step 1: 安装必要的一些系统工具
