@@ -25,3 +25,16 @@ func RandomString(n int, allowedChars ...[]rune) string {
 
 	return string(b)
 }
+
+// ReadMysqlRootPassword  读取compose文件中的mysql root密码
+func ReadMysqlRootPassword(basepath string) string {
+	//先检测是否存在yaml文件
+	if CheckFileExist(basepath + "docker-compose.yaml") {
+		DockerComposeYamlRead := ReadFile(basepath + "docker-compose.yaml")
+		DockerComposeYamlMap := YamlFileToMap(DockerComposeYamlRead)
+		MysqlPassword := DockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"]
+
+		return MysqlPassword.(string)
+	}
+	return ""
+}
