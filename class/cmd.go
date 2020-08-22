@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -51,7 +50,7 @@ func ExecLinuxCommandReturn(BashCommand string) string {
 	cmd := exec.Command("bash", "-c", BashCommand)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("cmd.Run() failed with %s\n", err)
+		fmt.Println(fmt.Sprint(err) + ": " + string(out))
 	}
 	return string(out)
 }
