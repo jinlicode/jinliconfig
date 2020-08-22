@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"jinliconfig/Template"
 	"jinliconfig/class"
@@ -8,6 +9,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // https网站创建注意事项
@@ -27,6 +29,53 @@ func main() {
 		os.Exit(3)
 	}
 
+	backup := flag.String("backup", "", "--backup=db 备份数据库 --backup=site 备份网站 --backup=all 备份全部")
+	flag.Parse()
+	if class.CheckFileExist(BASEPATH + "docker-compose.yaml") {
+		//读取docker-compose配置文件
+		BackupDockerComposeYamlRead := class.ReadFile(BASEPATH + "docker-compose.yaml")
+		BackupDockerComposeYamlMap := class.YamlFileToMap(BackupDockerComposeYamlRead)
+
+		if *backup == "db" {
+
+			//删除7天谴的db目录
+			class.ExecLinuxCommand(`find ` + BASEPATH + `autobackup/database/ -type f -mtime +7 -exec rm -rf {} \;`)
+
+			BackupMysqlPassword := BackupDockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"]
+			fileName := time.Now().Format("20060102150405") + ".sql.gz"
+			backupName := BASEPATH + "autobackup/database/" + fileName
+			class.ExecLinuxCommand(`cd ` + BASEPATH + ` && docker-compose exec -T mysql mysqldump --all-databases -uroot -p` + BackupMysqlPassword.(string) + ` |gzip >` + backupName)
+			os.Exit(1)
+		} else if *backup == "site" {
+
+			//删除7天谴的site目录
+			class.ExecLinuxCommand(`find ` + BASEPATH + `autobackup/site/ -type f -mtime +7 -exec rm -rf {} \;`)
+
+			fileName := time.Now().Format("20060102150405") + ".tar.gz"
+			backupName := BASEPATH + "autobackup/site/" + fileName
+			class.ExecLinuxCommand(`tar -zcf ` + backupName + ` ` + BASEPATH + `code/`)
+			os.Exit(2)
+
+		} else if *backup == "all" {
+
+			//删除7天谴的db目录
+			class.ExecLinuxCommand(`find ` + BASEPATH + `autobackup/database/ -type f -mtime +7 -exec rm -rf {} \;`)
+			//删除7天谴的site目录
+			class.ExecLinuxCommand(`find ` + BASEPATH + `autobackup/site/ -type f -mtime +7 -exec rm -rf {} \;`)
+
+			fileName := ""
+			backupName := ""
+			BackupMysqlPassword := BackupDockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"]
+			fileName = time.Now().Format("20060102150405") + ".sql.gz"
+			backupName = BASEPATH + "autobackup/database/" + fileName
+			class.ExecLinuxCommand(`cd ` + BASEPATH + ` && docker-compose exec -T mysql mysqldump --all-databases -uroot -p` + BackupMysqlPassword.(string) + ` |gzip >` + backupName)
+
+			fileName = time.Now().Format("20060102150405") + ".tar.gz"
+			backupName = BASEPATH + "autobackup/site/" + fileName
+			class.ExecLinuxCommand(`tar -zcf ` + backupName + ` ` + BASEPATH + `code/`)
+			os.Exit(3)
+		}
+	}
 	cmd := exec.Command("clear") //Linux example, its tested
 	cmd.Stdout = os.Stdout
 	cmd.Run()
@@ -282,9 +331,9 @@ CreateNewSiteFlag:
 
 			case WebServiceSelect:
 				WebConfigSelect := class.ConsoleOptionsSelect("请选择您需要管理的网站服务", []string{
-					WebServiceSelect + "的" + "nginx配置",
-					WebServiceSelect + "的" + "php配置",
-					WebServiceSelect + "的" + "数据库配置",
+					// WebServiceSelect + "的" + "nginx配置",
+					// WebServiceSelect + "的" + "php配置",
+					// WebServiceSelect + "的" + "数据库配置",
 					"重启" + WebServiceSelect + "网站服务",
 					"暂停" + WebServiceSelect + "网站服务",
 					"删除" + WebServiceSelect + "的网站(不删除数据)",
@@ -394,15 +443,60 @@ CreateNewSiteFlag:
 			}
 
 		case "备份管理":
-			fmt.Println("备份管理")
-			goto ServiceSelectFlag
+			WebBuckupSelectOption := []string{}
+			WebBuckupSelectOption = append(ExistSiteSlice, "返回上层")
+			WebBuckupSelect := class.ConsoleOptionsSelect("请选择您需要备份的网站", WebBuckupSelectOption, "请输入选项")
+
+			switch WebBuckupSelect {
+			case "返回上层":
+				fmt.Println("返回上层")
+				goto ServiceSelectFlag
+			case WebBuckupSelect:
+
+				WebSiteBuckupSelect := class.ConsoleOptionsSelect("请选择您需要备份选项", []string{WebBuckupSelect + "的数据库备份", WebBuckupSelect + "的网站备份", WebBuckupSelect + "的数据库+网站备份", "返回上层"}, "请输入选项")
+				WebSiteBuckupSelectString := strings.Replace(WebBuckupSelect, ".", "_", -1)
+
+				switch WebSiteBuckupSelect {
+				case "返回上层":
+					fmt.Println("返回上层")
+					goto ServiceSelectFlag
+				case WebBuckupSelect + "的数据库备份":
+
+					MysqlPassword := DockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"]
+					fileName := WebSiteBuckupSelectString + "_" + time.Now().Format("20060102150405") + ".sql.gz"
+					backupName := BASEPATH + "backup/database/" + fileName
+					class.ExecLinuxCommand(`cd ` + BASEPATH + ` && docker-compose exec -T mysql mysqldump -uroot -p` + MysqlPassword.(string) + ` ` + WebSiteBuckupSelectString + ` |gzip >` + backupName)
+					fmt.Println("数据库备份成功，备份在" + backupName)
+
+				case WebBuckupSelect + "的网站备份":
+
+					fileName := WebSiteBuckupSelectString + "_" + time.Now().Format("20060102150405") + ".tar.gz"
+					backupName := BASEPATH + "backup/site/" + fileName
+					class.ExecLinuxCommand(`tar -zcf ` + backupName + ` ` + BASEPATH + `code/` + WebSiteBuckupSelectString)
+					fmt.Println("网站备份成功，备份在" + backupName)
+
+				case WebBuckupSelect + "的数据库+网站备份":
+					fileName := ""
+					backupName := ""
+					MysqlPassword := DockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"]
+					fileName = WebSiteBuckupSelectString + "_" + time.Now().Format("20060102150405") + ".sql.gz"
+					backupName = BASEPATH + "backup/database/" + fileName
+					class.ExecLinuxCommand(`cd ` + BASEPATH + ` && docker-compose exec -T mysql mysqldump -uroot -p` + MysqlPassword.(string) + ` ` + WebSiteBuckupSelectString + ` |gzip >` + backupName)
+					fmt.Println("数据库备份成功，备份在" + backupName)
+
+					fileName = WebSiteBuckupSelectString + "_" + time.Now().Format("20060102150405") + ".tar.gz"
+					backupName = BASEPATH + "backup/site/" + fileName
+					class.ExecLinuxCommand(`tar -zcf ` + backupName + ` ` + BASEPATH + `code/` + WebSiteBuckupSelectString)
+					fmt.Println("网站备份成功，备份在" + backupName)
+				}
+			}
 		case "权限修复":
-			fmt.Println("权限修复")
-			goto ServiceSelectFlag
+			class.ExecLinuxCommand("cd " + BASEPATH + "code && chown -R 10000:10000 *")
+			fmt.Println("权限修复成功")
 		case "升级系统镜像":
 			fmt.Println("正在升级系统环境，预计需要5-15分钟.....")
 			class.ExecLinuxCommand("cd " + BASEPATH + " && " + "docker-compose pull" + " && " + "docker-compose restart")
-			goto ServiceSelectFlag
+			// goto ServiceSelectFlag
 		case "退出":
 			fmt.Println("退出")
 			break //可以添加
@@ -435,6 +529,16 @@ CreateNewSiteFlag:
 
 			//创建各配置项目录
 			class.ExecLinuxCommand("mkdir " + BASEPATH + "config/ && mkdir " + BASEPATH + "config/cert/ && mkdir " + BASEPATH + "config/mysql/ && mkdir " + BASEPATH + "config/nginx/ && mkdir " + BASEPATH + "config/php/")
+
+			//创建备份目录
+			class.ExecLinuxCommand("mkdir " + BASEPATH + "backup/")
+			class.ExecLinuxCommand("mkdir " + BASEPATH + "backup/database")
+			class.ExecLinuxCommand("mkdir " + BASEPATH + "backup/site")
+
+			//创建自动备份目录
+			class.ExecLinuxCommand("mkdir " + BASEPATH + "autobackup/")
+			class.ExecLinuxCommand("mkdir " + BASEPATH + "autobackup/database")
+			class.ExecLinuxCommand("mkdir " + BASEPATH + "autobackup/site")
 
 			//设置代码目录为 10000,10000
 			class.ExecLinuxCommand("chown -R 10000:10000 " + BASEPATH + "code/")
