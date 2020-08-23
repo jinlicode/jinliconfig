@@ -105,7 +105,7 @@ func MysqlRootEditPass(basepath string) string {
 		mysqlRandPassword := class.RandomString(16)
 
 		class.MysqlQuery(MysqlRootHOST, "root", MysqlRootPasswordString, "mysql", `set password for 'root'@'%' = password('`+mysqlRandPassword+`');`)
-		class.MysqlQuery(MysqlRootHOST, "root", MysqlRootPasswordString, "mysql", "flush privileges")
+		class.MysqlQuery(MysqlRootHOST, "root", mysqlRandPassword, "mysql", "flush privileges")
 
 		DockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"] = mysqlRandPassword
 
@@ -114,7 +114,7 @@ func MysqlRootEditPass(basepath string) string {
 		//写入新的yaml文件
 		class.WriteFile(basepath+"docker-compose.yaml", NewDockerComposeYamlString)
 
-		return MysqlRootPasswordString
+		return mysqlRandPassword
 
 	}
 	return ""
