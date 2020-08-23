@@ -78,3 +78,30 @@ func MysqlSiteEditPass(basepath string, newDomain string) {
 		class.WriteFile(basepath+"docker-compose.yaml", NewDockerComposeYamlString)
 	}
 }
+
+// MysqlRootEditPass mysql密码服务
+func MysqlRootEditPass(basepath string) {
+
+	if class.CheckFileExist(basepath + "docker-compose.yaml") {
+
+		//读取docker-compose配置文件
+		DockerComposeYamlRead := class.ReadFile(basepath + "docker-compose.yaml")
+		DockerComposeYamlMap := class.YamlFileToMap(DockerComposeYamlRead)
+
+		//自动创建网站对应mysql数据
+		MysqlRootPassword := class.ReadMysqlRootPassword(basepath)
+		MysqlRootPasswordString := MysqlRootPassword
+		// //获取随机密码
+		mysqlRandPassword := class.RandomString(16)
+
+		class.MysqlQuery("mysql", "root", MysqlRootPasswordString, "mysql", `set password for 'root'@'%' = password('`+mysqlRandPassword+`');`)
+		class.MysqlQuery("mysql", "root", MysqlRootPasswordString, "mysql", "flush privileges")
+
+		DockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"] = mysqlRandPassword
+
+		fmt.Println(DockerComposeYamlMap)
+		NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
+		//写入新的yaml文件
+		class.WriteFile(basepath+"docker-compose.yaml", NewDockerComposeYamlString)
+	}
+}
