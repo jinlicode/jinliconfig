@@ -210,7 +210,7 @@ WebConfigSelectFlag:
 		return false
 
 	case "重置" + WebServiceSelect + "数据库密码":
-		newPass := manage.MysqlSiteEditPass(basepath, MapKey)
+		newPass := MysqlSiteEditPass(basepath, MapKey)
 		if newPass != "" {
 			fmt.Println(WebServiceSelect + "的新数据库密码为：" + newPass)
 
