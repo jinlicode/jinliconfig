@@ -49,10 +49,12 @@ func MysqlSiteEditPass(basepath string, newDomain string) string {
 		DockerComposeYamlMap := class.YamlFileToMap(DockerComposeYamlRead)
 		newDomainMap := DockerComposeYamlMap["services"].(map[string]interface{})[newDomain]
 
-		//自动创建网站对应mysql数据
+		//获取mysqlroot信息
 		MysqlRootPassword := class.ReadMysqlRootPassword(basepath)
 		MysqlRootPasswordString := MysqlRootPassword
-		// //获取随机密码
+		MysqlRootHOST := class.ReadMysqlHost(basepath)
+
+		//获取随机密码
 		mysqlSiteRandPassword := class.RandomString(16)
 
 		//转成json 再做替换
@@ -64,8 +66,8 @@ func MysqlSiteEditPass(basepath string, newDomain string) string {
 		//将匹配到的部分替换为"##.#"
 		newDomainMapJSONString = re.ReplaceAllString(newDomainMapJSONString, `"MYSQL_PASS=`+mysqlSiteRandPassword+`"`)
 
-		class.MysqlQuery("mysql", "root", MysqlRootPasswordString, "mysql", `set password for '`+newDomain+`'@'%' = password('`+mysqlSiteRandPassword+`');`)
-		class.MysqlQuery("mysql", "root", MysqlRootPasswordString, "mysql", "flush privileges")
+		class.MysqlQuery(MysqlRootHOST, "root", MysqlRootPasswordString, "mysql", `set password for '`+newDomain+`'@'%' = password('`+mysqlSiteRandPassword+`');`)
+		class.MysqlQuery(MysqlRootHOST, "root", MysqlRootPasswordString, "mysql", "flush privileges")
 
 		//写入yaml
 		NewSitePhpVersionComposeYaml, _ := class.JSONToYaml(newDomainMapJSONString)
@@ -94,14 +96,16 @@ func MysqlRootEditPass(basepath string) string {
 		DockerComposeYamlRead := class.ReadFile(basepath + "docker-compose.yaml")
 		DockerComposeYamlMap := class.YamlFileToMap(DockerComposeYamlRead)
 
-		//自动创建网站对应mysql数据
+		//获取mysqlroot信息
 		MysqlRootPassword := class.ReadMysqlRootPassword(basepath)
 		MysqlRootPasswordString := MysqlRootPassword
-		// //获取随机密码
+		MysqlRootHOST := class.ReadMysqlHost(basepath)
+
+		//获取随机密码
 		mysqlRandPassword := class.RandomString(16)
 
-		class.MysqlQuery("mysql", "root", MysqlRootPasswordString, "mysql", `set password for 'root'@'%' = password('`+mysqlRandPassword+`');`)
-		class.MysqlQuery("mysql", "root", MysqlRootPasswordString, "mysql", "flush privileges")
+		class.MysqlQuery(MysqlRootHOST, "root", MysqlRootPasswordString, "mysql", `set password for 'root'@'%' = password('`+mysqlRandPassword+`');`)
+		class.MysqlQuery(MysqlRootHOST, "root", MysqlRootPasswordString, "mysql", "flush privileges")
 
 		DockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"] = mysqlRandPassword
 
