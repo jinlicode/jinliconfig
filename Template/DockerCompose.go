@@ -126,6 +126,7 @@ func DockerComposePhpmyadmin() string {
       - "8080:80"
     environment:
       - TZ=Asia/Shanghai
+      - PMA_HOST=mysql
     networks:
       jinli_net:
         ipv4_address: 10.99.6.2
