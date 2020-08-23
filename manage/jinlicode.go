@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// InstallJinliCode 首次安装jinlicode
 func InstallJinliCode(basepath string) bool {
 	fmt.Println("您未安装锦鲤部署，是否要安装？")
 	NewInstall := class.ConsoleOptionsSelect("请输入您的选项", []string{"否", "是"}, "请选择是否重新安装")
@@ -92,4 +93,5 @@ func InstallJinliCode(basepath string) bool {
 
 		return false
 	}
+	return false
 }
