@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-//创建新网站
+//CreateSite 创建新网站
 func CreateSite(basepath string, DockerComposeYamlMap map[string]interface{}, SiteNetMax int) {
 ReInputSiteDomainFlag:
 	NewSiteDomain := class.ConsoleUserInput("请输入您需要添加的域名：")
@@ -188,6 +188,7 @@ func SiteManage(basepath string, WebServiceSelect string, DockerComposeYamlMap m
 		// WebServiceSelect + "的" + "php配置",
 		// WebServiceSelect + "的" + "数据库配置",
 		"查看" + WebServiceSelect + "数据库信息",
+		"重置" + WebServiceSelect + "数据库密码",
 		"重启" + WebServiceSelect + "网站服务",
 		"暂停" + WebServiceSelect + "网站服务",
 		"删除" + WebServiceSelect + "的网站(不删除数据)",
@@ -206,6 +207,14 @@ WebConfigSelectFlag:
 		fmt.Println("数据库服务器地址：" + class.ReadMysqlHost(basepath))
 		fmt.Println(WebServiceSelect + "的数据库用户名：" + class.ReadSiteMysqlInfo(basepath, MapKey, "user"))
 		fmt.Println(WebServiceSelect + "的数据库密码：" + class.ReadSiteMysqlInfo(basepath, MapKey, "pass"))
+		return false
+
+	case "重置" + WebServiceSelect + "数据库密码":
+		newPass := manage.MysqlSiteEditPass(basepath, MapKey)
+		if newPass != "" {
+			fmt.Println(WebServiceSelect + "的新数据库密码为：" + newPass)
+
+		}
 		return false
 
 	case WebServiceSelect + "的" + "nginx配置":

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-//FlagBackup 命令行整体备份
+//FlagBackupExec 命令行整体备份
 func FlagBackupExec(basepath string) {
 
 	backup := flag.String("backup", "", "--backup=db 备份数据库 --backup=site 备份网站 --backup=all 备份全部")

@@ -9,7 +9,7 @@ import (
 // PhpMyAdminManage 管理phpmyadmin面板
 func PhpMyAdminManage(basepath string) bool {
 reSelectPhpMyAdmin:
-	PhpMyadminSelect := class.ConsoleOptionsSelect("phpmyadmin面板", []string{"开启", "查看配置", "退出", "返回上一层"}, "请输入选项")
+	PhpMyadminSelect := class.ConsoleOptionsSelect("phpmyadmin面板", []string{"开启", "查看配置", "重置root密码", "退出", "返回上一层"}, "请输入选项")
 	switch PhpMyadminSelect {
 	case "开启":
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose up -d phpmyadmin")
@@ -22,6 +22,11 @@ reSelectPhpMyAdmin:
 		fmt.Println("mysql用户名：root")
 		fmt.Println("mysql密码：" + class.ReadMysqlRootPassword(basepath))
 		goto reSelectPhpMyAdmin
+	case "重置root密码":
+		newPass := MysqlRootEditPass(basepath)
+		if newPass != "" {
+			fmt.Println("root新密码密码：" + newPass)
+		}
 	case "退出":
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop phpmyadmin")
 	case "返回上一层":
@@ -35,7 +40,7 @@ reSelectPhpMyAdmin:
 }
 
 // MysqlSiteEditPass 网站mysql密码服务
-func MysqlSiteEditPass(basepath string, newDomain string) {
+func MysqlSiteEditPass(basepath string, newDomain string) string {
 
 	if class.CheckFileExist(basepath + "docker-compose.yaml") {
 
@@ -49,8 +54,6 @@ func MysqlSiteEditPass(basepath string, newDomain string) {
 		MysqlRootPasswordString := MysqlRootPassword
 		// //获取随机密码
 		mysqlSiteRandPassword := class.RandomString(16)
-
-		fmt.Println(mysqlSiteRandPassword)
 
 		//转成json 再做替换
 		newDomainMapJSONString, _ := class.MapToJson(newDomainMap.(map[string]interface{}))
@@ -76,11 +79,14 @@ func MysqlSiteEditPass(basepath string, newDomain string) {
 		NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
 		//写入新的yaml文件
 		class.WriteFile(basepath+"docker-compose.yaml", NewDockerComposeYamlString)
+
+		return mysqlSiteRandPassword
 	}
+	return ""
 }
 
 // MysqlRootEditPass mysql密码服务
-func MysqlRootEditPass(basepath string) {
+func MysqlRootEditPass(basepath string) string {
 
 	if class.CheckFileExist(basepath + "docker-compose.yaml") {
 
@@ -103,5 +109,9 @@ func MysqlRootEditPass(basepath string) {
 		NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
 		//写入新的yaml文件
 		class.WriteFile(basepath+"docker-compose.yaml", NewDockerComposeYamlString)
+
+		return MysqlRootPasswordString
+
 	}
+	return ""
 }
