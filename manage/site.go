@@ -187,17 +187,27 @@ func SiteManage(basepath string, WebServiceSelect string, DockerComposeYamlMap m
 		// WebServiceSelect + "的" + "nginx配置",
 		// WebServiceSelect + "的" + "php配置",
 		// WebServiceSelect + "的" + "数据库配置",
+		"查看" + WebServiceSelect + "数据库信息",
 		"重启" + WebServiceSelect + "网站服务",
 		"暂停" + WebServiceSelect + "网站服务",
 		"删除" + WebServiceSelect + "的网站(不删除数据)",
 		"删除" + WebServiceSelect + "的网站(删除数据，包含数据库和程序)",
 		"返回上层"}, "请输入选项")
+
+	MapKey := strings.Replace(WebServiceSelect, ".", "_", -1)
+
 	//网站内服务修改主菜单
 WebConfigSelectFlag:
 	switch WebConfigSelect {
 	case "返回上层":
 		fmt.Println("返回上层")
 		return false
+	case "查看" + WebServiceSelect + "数据库信息":
+		fmt.Println("数据库服务器地址：" + class.ReadMysqlHost(basepath))
+		fmt.Println(WebServiceSelect + "的数据库用户名：" + class.ReadSiteMysqlInfo(basepath, MapKey, "user"))
+		fmt.Println(WebServiceSelect + "的数据库密码：" + class.ReadSiteMysqlInfo(basepath, MapKey, "pass"))
+		goto WebConfigSelectFlag
+
 	case WebServiceSelect + "的" + "nginx配置":
 		fmt.Println(WebServiceSelect + "的" + "nginx配置")
 		switch WebConfigSelect {
@@ -242,7 +252,6 @@ WebConfigSelectFlag:
 			return false
 		}
 		//输入命令 删除yaml中服务
-		MapKey := strings.Replace(WebServiceSelect, ".", "_", -1)
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
 
 		//执行完之后删除yaml中对应的map
