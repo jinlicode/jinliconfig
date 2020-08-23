@@ -206,7 +206,7 @@ WebConfigSelectFlag:
 		fmt.Println("数据库服务器地址：" + class.ReadMysqlHost(basepath))
 		fmt.Println(WebServiceSelect + "的数据库用户名：" + class.ReadSiteMysqlInfo(basepath, MapKey, "user"))
 		fmt.Println(WebServiceSelect + "的数据库密码：" + class.ReadSiteMysqlInfo(basepath, MapKey, "pass"))
-		goto WebConfigSelectFlag
+		return false
 
 	case WebServiceSelect + "的" + "nginx配置":
 		fmt.Println(WebServiceSelect + "的" + "nginx配置")
