@@ -5,11 +5,12 @@ import (
 	"jinliconfig/Template"
 	"jinliconfig/class"
 	"os"
+	"strconv"
 	"strings"
 )
 
 // InstallJinliCode 首次安装jinlicode
-func InstallJinliCode(basepath string) bool {
+func InstallJinliCode(basepath string, jinliVersion float32) bool {
 	fmt.Println("您未安装锦鲤部署，是否要安装？")
 	NewInstall := class.ConsoleOptionsSelect("请输入您的选项", []string{"否", "是"}, "请选择是否重新安装")
 	if NewInstall == "否" {
@@ -55,8 +56,14 @@ func InstallJinliCode(basepath string) bool {
 		// fmt.Println("安装过程")
 
 		DockerComposeVersion := Template.DockerComposeVersion()
-		DockerComposeNginxMap := class.YamlFileToMap(Template.DockerComposeNginx())
+		DockerComposeNginxString := Template.DockerComposeNginx()
 		DockerComposeMysqlString := Template.DockerComposeMysql()
+
+		//替换code版本号
+		jinliVersionString := strconv.FormatFloat(float64(jinliVersion), 'f', 2, 64)
+		DockerComposeNginxString = strings.Replace(DockerComposeNginxString, "JINLIVER=VERSION", "JINLIVER="+jinliVersionString, 1)
+
+		DockerComposeNginxMap := class.YamlFileToMap(DockerComposeNginxString)
 
 		//自动生成mysql密码
 		mysqlRandPassword := class.RandomString(16)
@@ -66,11 +73,15 @@ func InstallJinliCode(basepath string) bool {
 
 		DockerComposeNetWorksMap := class.YamlFileToMap(Template.DockerComposeNetWorks())
 
+		//获取phpmyadmin
+		DockerComposePhpmyadminMap := class.YamlFileToMap(Template.DockerComposePhpmyadmin())
+
 		DockerComposeMap := make(map[string]interface{})
 		DockerComposeMap["version"] = DockerComposeVersion
 		DockerComposeMap["services"] = make(map[string]interface{})
 		DockerComposeMap["services"].(map[string]interface{})["nginx"] = DockerComposeNginxMap
 		DockerComposeMap["services"].(map[string]interface{})["mysql"] = DockerComposeMysqlMap
+		DockerComposeMap["services"].(map[string]interface{})["phpmyadmin"] = DockerComposePhpmyadminMap
 		DockerComposeMap["networks"] = DockerComposeNetWorksMap
 
 		//写入yaml文件 跳转到新建网站
@@ -82,7 +93,7 @@ func InstallJinliCode(basepath string) bool {
 
 		//启动docker-compose
 		fmt.Println("服务正在启动中，预计需要10分钟，请您耐心等待......")
-		class.ExecLinuxCommand("cd " + basepath + " && docker-compose up -d")
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose up -d && docker-compose stop phpmyadmin")
 
 		//回显数据库密码
 		fmt.Println("\n=======================数据库ROOT信息===========================")

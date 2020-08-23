@@ -20,6 +20,7 @@ func main() {
 	const (
 		//基础目录配置
 		BASEPATH = "/var/jinli/"
+		JINLIVER = 1.1
 	)
 	//检查是否为root启动
 	if os.Getuid() != 0 {
@@ -104,7 +105,7 @@ CreateNewSiteFlag:
 
 		//服务选择主菜单
 	ServiceSelectFlag:
-		ServiceSelect := class.ConsoleOptionsSelect("请选择您需要的服务", []string{"网站服务", "备份管理", "权限修复", "升级系统镜像", "退出"}, "请输入选项")
+		ServiceSelect := class.ConsoleOptionsSelect("请选择您需要的服务", []string{"网站服务", "备份管理", "数据库管理", "权限修复", "升级系统镜像", "退出"}, "请输入选项")
 		switch ServiceSelect {
 		case "网站服务":
 			//网站服务选择主菜单
@@ -131,6 +132,11 @@ CreateNewSiteFlag:
 				goto ServiceSelectFlag
 			}
 
+		case "数据库管理":
+			if manage.PhpMyAdminManage(BASEPATH) == false {
+				goto ServiceSelectFlag
+			}
+
 		case "权限修复":
 			class.ExecLinuxCommand("cd " + BASEPATH + "code && chown -R 10000:10000 *")
 			fmt.Println("权限修复成功")
@@ -144,7 +150,7 @@ CreateNewSiteFlag:
 			// goto WebServiceSelect //随便添加的一会删除
 		}
 	} else {
-		if manage.InstallJinliCode(BASEPATH) == false {
+		if manage.InstallJinliCode(BASEPATH, JINLIVER) == false {
 			goto CreateNewSiteFlag
 		}
 	}

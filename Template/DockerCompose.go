@@ -1,7 +1,7 @@
 package Template
 
 func DockerComposeVersion() string {
-	Version := `3.1`
+	Version := `3.5`
 	return Version
 }
 
@@ -30,7 +30,7 @@ func DockerComposeNginx() string {
     restart: always
     environment:
         - TZ=Asia/Shanghai
-        - JINLIVER=1.1
+        - JINLIVER=VERSION
     networks:
       jinli_net:
         ipv4_address: 10.99.1.2
