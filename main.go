@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"jinliconfig/Template"
 	"jinliconfig/class"
+	"jinliconfig/manage"
 	"os"
 	"os/exec"
 	"strconv"
@@ -28,7 +29,7 @@ func main() {
 	}
 
 	//命令行备份
-	class.FlagBackupExec(BASEPATH)
+	manage.FlagBackupExec(BASEPATH)
 
 	cmd := exec.Command("clear") //Linux example, its tested
 	cmd.Stdout = os.Stdout
@@ -117,17 +118,17 @@ CreateNewSiteFlag:
 				fmt.Println("返回上层")
 				goto ServiceSelectFlag
 			case "新增网站":
-				class.CreateSite(BASEPATH, DockerComposeYamlMap, SiteNetMax)
+				manage.CreateSite(BASEPATH, DockerComposeYamlMap, SiteNetMax)
 
 			case WebServiceSelect:
-				if class.SiteManage(BASEPATH, WebServiceSelect, DockerComposeYamlMap) == false {
+				if manage.SiteManage(BASEPATH, WebServiceSelect, DockerComposeYamlMap) == false {
 					goto WebServiceSelectFlag
 				}
 			}
 
 		case "备份管理":
 
-			if class.BackupSiteManage(BASEPATH, ExistSiteSlice) == false {
+			if manage.BackupSiteManage(BASEPATH, ExistSiteSlice) == false {
 				goto ServiceSelectFlag
 			}
 
