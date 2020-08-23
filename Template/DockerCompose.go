@@ -89,7 +89,10 @@ func DockerComposeMemcached() string {
     image: registry.cn-beijing.aliyuncs.com/jinlicode/memcached:1.6.6
     restart: always
     container_name: memcached
+    expose:
+    - "11211"
     environment:
+      - TZ=Asia/Shanghai
       - MEMCACHED_CACHE_SIZE=64
     networks:
       jinli_net:
