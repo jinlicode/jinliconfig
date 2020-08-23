@@ -18,6 +18,7 @@ jinli_net:
 func DockerComposeNginx() string {
 	Nginx := `
     image: registry.cn-beijing.aliyuncs.com/jinlicode/nginx:v1
+    container_name: nginx
     ports:
         - "80:80"
         - "443:443"
@@ -41,6 +42,7 @@ func DockerComposePhp() string {
 	Php := `
     image: registry.cn-beijing.aliyuncs.com/jinlicode/php:latest
     user: 10000:10000
+    container_name: www_example_com
     volumes:
         - ./code/www_example_com:/var/www/www_example_com
         - ./config/php/www_example_com/php.ini:/usr/local/etc/php/php.ini
