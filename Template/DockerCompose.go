@@ -116,3 +116,19 @@ func DockerComposeRedis() string {
   `
 	return Redis
 }
+func DockerComposePhpmyadmin() string {
+	Phpmyadmin := `
+  phpmyadmin:
+    image: registry.cn-beijing.aliyuncs.com/jinlicode/phpmyadmin:5.0.2:
+    restart: always
+    container_name: phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      jinli_net:
+        ipv4_address: 10.99.6.2
+  `
+	return Phpmyadmin
+}
