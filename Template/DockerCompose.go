@@ -100,3 +100,19 @@ func DockerComposeMemcached() string {
   `
 	return Memcached
 }
+func DockerComposeRedis() string {
+	Redis := `
+  redis:
+    image: registry.cn-beijing.aliyuncs.com/jinlicode/redis:5.0.9
+    restart: always
+    container_name: redis
+    expose:
+    - "6379"
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      jinli_net:
+        ipv4_address: 10.99.5.2
+  `
+	return Redis
+}
