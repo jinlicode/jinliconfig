@@ -27,6 +27,8 @@ reSelectPhpMyAdmin:
 		if newPass != "" {
 			fmt.Println("root新密码密码：" + newPass)
 		}
+		return false
+
 	case "退出":
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop phpmyadmin")
 	case "返回上一层":
@@ -109,7 +111,6 @@ func MysqlRootEditPass(basepath string) string {
 
 		DockerComposeYamlMap["services"].(map[string]interface{})["mysql"].(map[string]interface{})["environment"].(map[string]interface{})["MYSQL_ROOT_PASSWORD"] = mysqlRandPassword
 
-		fmt.Println(DockerComposeYamlMap)
 		NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
 		//写入新的yaml文件
 		class.WriteFile(basepath+"docker-compose.yaml", NewDockerComposeYamlString)
