@@ -48,6 +48,7 @@ func DockerComposePhp() string {
         - ./config/php/www_example_com/php.ini:/usr/local/etc/php/php.ini
         - ./config/php/www_example_com/php-fpm.conf:/usr/local/etc/php-fpm.conf
         - ./config/php/www_example_com/www.conf:/usr/local/etc/php-fpm.d/www.conf
+        - ./log/openrasp/www_example_com:/opt/rasp/logs/alarm
     restart: always
     expose:
         - "9000"
