@@ -51,3 +51,13 @@ func MapToYaml(m map[string]interface{}) (string, error) {
 	//最后转成yaml
 	return string(y), nil
 }
+
+func JSONToYaml(json string) (string, error) {
+
+	j := []byte(json)
+	y, err := yaml.JSONToYAML(j)
+	if err != nil {
+		return "json to yaml error", nil
+	}
+	return string(y), nil
+}
