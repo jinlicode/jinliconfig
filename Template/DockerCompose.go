@@ -119,7 +119,7 @@ func DockerComposeRedis() string {
 func DockerComposePhpmyadmin() string {
 	Phpmyadmin := `
   phpmyadmin:
-    image: registry.cn-beijing.aliyuncs.com/jinlicode/phpmyadmin:5.0.2:
+    image: registry.cn-beijing.aliyuncs.com/jinlicode/phpmyadmin:5.0.2
     restart: always
     container_name: phpmyadmin
     ports:
