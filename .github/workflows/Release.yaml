@@ -23,3 +23,11 @@ jobs:
         args: release
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    - name: deploy file to server
+      uses: wlixcc/SFTP-Deploy-Action@v1.0 
+      with:  
+        username: 'root'   #ssh user name
+        server: '${{ secrets.SERVER_IP }}'
+        ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+        local_path: 'dist/jinliconfig_0.9_linux_amd64.tar.gz'
+        remote_path: '/opt/'
