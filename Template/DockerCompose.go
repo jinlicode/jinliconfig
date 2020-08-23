@@ -86,7 +86,7 @@ func DockerComposeMysql() string {
 func DockerComposeMemcached() string {
 	Memcached := `
   memcached:
-    image: registry.cn-beijing.aliyuncs.com/bitnami/memcached:1.6.6
+    image: registry.cn-beijing.aliyuncs.com/jinlicode/memcached:1.6.6
     restart: always
     container_name: memcached
     environment:
