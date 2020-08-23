@@ -1,4 +1,4 @@
-name: release upload
+name: release_upload
 on:
   create:
     tags:
