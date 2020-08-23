@@ -54,6 +54,9 @@ func DockerComposePhp() string {
         - "9000"
     environment:
         - TZ=Asia/Shanghai
+        - MYSQL_HOST=MYSQL_HOST
+        - MYSQL_USER=MYSQL_USER
+        - MYSQL_PASS=MYSQL_PASS
     depends_on:
         - mysql
         - nginx
