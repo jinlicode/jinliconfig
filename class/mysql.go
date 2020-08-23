@@ -21,6 +21,28 @@ func MysqlInfo(YamlFile string) []string {
 	return databases
 }
 
+//在数据库执行sql语句
+func MysqlQuery(MysqlHost string, MysqlUser string, MysqlPassword string, DatabaseName string, QuerySql string) {
+	//数据库配置
+
+	port := "3306"
+	//Db数据库连接池
+	var DB *sql.DB
+
+	//构建连接："用户名:密码@tcp(IP:端口)/数据库?charset=utf8"
+	path := strings.Join([]string{MysqlUser, ":", MysqlPassword, "@tcp(", MysqlHost, ":", port, ")/", DatabaseName, "?charset=utf8mb4"}, "")
+
+	//打开数据库,前者是驱动名，所以要导入： _ "github.com/go-sql-driver/mysql"
+	DB, _ = sql.Open("mysql", path)
+	//验证连接
+	if err := DB.Ping(); err != nil {
+		fmt.Println("opon database fail")
+	}
+	//执行查询
+	Databases, _ := DB.Query(QuerySql)
+	defer Databases.Close()
+}
+
 //读取数据库内容
 func MysqlGetDatabases(MysqlHost string, MysqlUser string, MysqlPassword string) []string {
 	//数据库配置
