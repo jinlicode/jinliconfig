@@ -75,7 +75,7 @@ CreateNewSiteFlag:
 		//获取最大内网数
 		SiteNetMax := 2
 		for k, v := range DockerComposeYamlMap["services"].(map[string]interface{}) {
-			if k != "nginx" && k != "memcached" && k != "mysql" && k != "php" {
+			if k != "nginx" && k != "memcached" && k != "mysql" && k != "php" && k != "phpmyadmin" {
 				ExistSiteSlice = append(ExistSiteSlice, strings.Replace(k, "_", ".", -1))
 
 				//获取内网最大数字

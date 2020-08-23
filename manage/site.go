@@ -102,6 +102,17 @@ ReInputSiteDomainFlag:
 	//替换php版本
 	SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "jinlicode/php:latest", "jinlicode/php:v"+NewSitePhpVersion, 1)
 
+	//自动创建网站对应mysql数据
+	MysqlRootPassword := class.ReadMysqlRootPassword(basepath)
+	MysqlRootPasswordString := MysqlRootPassword
+	//获取随机密码
+	mysqlSiteRandPassword := class.RandomString(16)
+
+	//替换mysql信息到环境变量
+	SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "MYSQL_HOST=MYSQL_HOST", "MYSQL_HOST="+class.ReadMysqlHost(basepath), 1)
+	SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "MYSQL_USER=MYSQL_USER", "MYSQL_USER="+newDomain, 1)
+	SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "MYSQL_PASS=MYSQL_PASS", "MYSQL_PASS="+mysqlSiteRandPassword, 1)
+
 	//生成子map
 	NewSitePhpVersionComposeMap := class.YamlFileToMap(SitePhpVersionCompose)
 
@@ -129,14 +140,13 @@ ReInputSiteDomainFlag:
 		TemplateNginxHTTPString = strings.Replace(TemplateNginxHTTPString, "www.example.com", NewSiteDomain, -1)
 		TemplateNginxHTTPString = strings.Replace(TemplateNginxHTTPString, "php:9000", newDomain+":9000", -1)
 		class.WriteFile(basepath+"config/nginx/"+newDomain+".conf", TemplateNginxHTTPString)
+
 	} else {
 
 		TemplateNginxHTTPSString := Template.TemplateNginxHttps()
 		TemplateNginxHTTPSString = strings.Replace(TemplateNginxHTTPSString, "www_example_com", newDomain, -1)
 		TemplateNginxHTTPSString = strings.Replace(TemplateNginxHTTPSString, "www.example.com", NewSiteDomain, -1)
 		TemplateNginxHTTPSString = strings.Replace(TemplateNginxHTTPSString, "php:9000", newDomain+":9000", -1)
-
-		//如果是手动输入 保存cert.key
 		class.WriteFile(basepath+"config/nginx/"+newDomain+".conf", TemplateNginxHTTPSString)
 
 	}
@@ -155,13 +165,6 @@ ReInputSiteDomainFlag:
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose exec nginx certbot -n --nginx --agree-tos -m " + NewSiteSSLEmail + " --domains " + NewSiteDomain)
 	}
 
-	//自动创建网站对应mysql数据
-	MysqlRootPassword := class.ReadMysqlRootPassword(basepath)
-	MysqlRootPasswordString := MysqlRootPassword
-
-	//获取随机密码
-	mysqlSiteRandPassword := class.RandomString(16)
-
 	//自动创建数据库 用户名 密码
 	class.CreateDatabase(basepath, MysqlRootPasswordString, newDomain, newDomain, mysqlSiteRandPassword)
 
@@ -169,7 +172,7 @@ ReInputSiteDomainFlag:
 
 	fmt.Println("\n=======================您的网站对应信息==========================")
 	fmt.Println("。请将您的网站代码上传至 【" + basepath + "code/" + newDomain + "】 目录")
-	fmt.Println("。数据库服务器地址：mysql")
+	fmt.Println("。数据库服务器地址：" + class.ReadMysqlHost(basepath))
 	fmt.Println("。数据库库名：" + newDomain)
 	fmt.Println("。数据库用户名：" + newDomain)
 	fmt.Println("。数据库密码：" + mysqlSiteRandPassword)
