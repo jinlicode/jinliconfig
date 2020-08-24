@@ -87,14 +87,18 @@ func BackupSiteManage(basepath string, ExistSiteSlice []string) bool {
 			fileName := WebSiteBuckupSelectString + "_" + time.Now().Format("20060102150405") + ".sql.gz"
 			backupName := basepath + "backup/database/" + fileName
 			class.ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec -T mysql mysqldump -h` + MysqlHost + ` -uroot -p` + MysqlPassword + ` ` + WebSiteBuckupSelectString + ` |gzip >` + backupName)
+			class.PrintHr()
 			fmt.Println("数据库备份成功，备份在" + backupName)
+			class.PrintHr()
 			return false
 		case WebBuckupSelect + "的网站备份":
 
 			fileName := WebSiteBuckupSelectString + "_" + time.Now().Format("20060102150405") + ".tar.gz"
 			backupName := basepath + "backup/site/" + fileName
 			class.ExecLinuxCommand(`tar -zcf ` + backupName + ` ` + basepath + `code/` + WebSiteBuckupSelectString)
+			class.PrintHr()
 			fmt.Println("网站备份成功，备份在" + backupName)
+			class.PrintHr()
 			return false
 
 		case WebBuckupSelect + "的数据库+网站备份":
@@ -106,12 +110,15 @@ func BackupSiteManage(basepath string, ExistSiteSlice []string) bool {
 			fileName = WebSiteBuckupSelectString + "_" + time.Now().Format("20060102150405") + ".sql.gz"
 			backupName = basepath + "backup/database/" + fileName
 			class.ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec -T mysql mysqldump -h` + MysqlHost + ` -uroot -p` + MysqlPassword + ` ` + WebSiteBuckupSelectString + ` |gzip >` + backupName)
+			class.PrintHr()
 			fmt.Println("数据库备份成功，备份在" + backupName)
+			class.PrintHr()
 
 			fileName = WebSiteBuckupSelectString + "_" + time.Now().Format("20060102150405") + ".tar.gz"
 			backupName = basepath + "backup/site/" + fileName
 			class.ExecLinuxCommand(`tar -zcf ` + backupName + ` ` + basepath + `code/` + WebSiteBuckupSelectString)
 			fmt.Println("网站备份成功，备份在" + backupName)
+			class.PrintHr()
 			return false
 		}
 	}

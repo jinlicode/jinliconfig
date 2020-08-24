@@ -204,15 +204,19 @@ WebConfigSelectFlag:
 		fmt.Println("返回上层")
 		return false
 	case "查看" + WebServiceSelect + "数据库信息":
+		class.PrintHr()
 		fmt.Println("数据库服务器地址：" + class.ReadMysqlHost(basepath))
 		fmt.Println(WebServiceSelect + "的数据库用户名：" + class.ReadSiteMysqlInfo(basepath, MapKey, "user"))
 		fmt.Println(WebServiceSelect + "的数据库密码：" + class.ReadSiteMysqlInfo(basepath, MapKey, "pass"))
+		class.PrintHr()
 		return false
 
 	case "重置" + WebServiceSelect + "数据库密码":
 		newPass := MysqlSiteEditPass(basepath, MapKey)
 		if newPass != "" {
+			class.PrintHr()
 			fmt.Println(WebServiceSelect + "的新数据库密码为：" + newPass)
+			class.PrintHr()
 
 		}
 		return false
