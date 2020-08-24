@@ -1,6 +1,7 @@
 package class
 
 import (
+	"fmt"
 	"math/rand"
 	"regexp"
 	"time"
@@ -89,4 +90,9 @@ func ReadSiteMysqlInfo(basepath string, dockerName string, readType string) stri
 		}
 	}
 	return ""
+}
+
+// PrintHr 打印一行等号
+func PrintHr() {
+	fmt.Println("\n====================================")
 }

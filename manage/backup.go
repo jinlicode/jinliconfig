@@ -21,9 +21,10 @@ func FlagBackupExec(basepath string) {
 			class.ExecLinuxCommand(`find ` + basepath + `autobackup/database/ -type f -mtime +7 -exec rm -rf {} \;`)
 
 			BackupMysqlPassword := class.ReadMysqlRootPassword(basepath)
+			BackupReadMysqlHost := class.ReadMysqlHost(basepath)
 			fileName := time.Now().Format("20060102150405") + ".sql.gz"
 			backupName := basepath + "autobackup/database/" + fileName
-			class.ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec -T mysql mysqldump --all-databases -uroot -p` + BackupMysqlPassword + ` |gzip >` + backupName)
+			class.ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec -T mysql mysqldump -h` + BackupReadMysqlHost + ` --all-databases -uroot -p` + BackupMysqlPassword + ` |gzip >` + backupName)
 			os.Exit(1)
 		} else if *backup == "site" {
 
@@ -45,9 +46,10 @@ func FlagBackupExec(basepath string) {
 			fileName := ""
 			backupName := ""
 			BackupMysqlPassword := class.ReadMysqlRootPassword(basepath)
+			BackupReadMysqlHost := class.ReadMysqlHost(basepath)
 			fileName = time.Now().Format("20060102150405") + ".sql.gz"
 			backupName = basepath + "autobackup/database/" + fileName
-			class.ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec -T mysql mysqldump --all-databases -uroot -p` + BackupMysqlPassword + ` |gzip >` + backupName)
+			class.ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec -T mysql mysqldump -h` + BackupReadMysqlHost + ` --all-databases -uroot -p` + BackupMysqlPassword + ` |gzip >` + backupName)
 
 			fileName = time.Now().Format("20060102150405") + ".tar.gz"
 			backupName = basepath + "autobackup/site/" + fileName
@@ -80,9 +82,11 @@ func BackupSiteManage(basepath string, ExistSiteSlice []string) bool {
 		case WebBuckupSelect + "的数据库备份":
 
 			MysqlPassword := class.ReadMysqlRootPassword(basepath)
+			MysqlHost := class.ReadMysqlHost(basepath)
+
 			fileName := WebSiteBuckupSelectString + "_" + time.Now().Format("20060102150405") + ".sql.gz"
 			backupName := basepath + "backup/database/" + fileName
-			class.ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec -T mysql mysqldump -uroot -p` + MysqlPassword + ` ` + WebSiteBuckupSelectString + ` |gzip >` + backupName)
+			class.ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec -T mysql mysqldump -h` + MysqlHost + ` -uroot -p` + MysqlPassword + ` ` + WebSiteBuckupSelectString + ` |gzip >` + backupName)
 			fmt.Println("数据库备份成功，备份在" + backupName)
 			return false
 		case WebBuckupSelect + "的网站备份":
@@ -97,9 +101,11 @@ func BackupSiteManage(basepath string, ExistSiteSlice []string) bool {
 			fileName := ""
 			backupName := ""
 			MysqlPassword := class.ReadMysqlRootPassword(basepath)
+			MysqlHost := class.ReadMysqlHost(basepath)
+
 			fileName = WebSiteBuckupSelectString + "_" + time.Now().Format("20060102150405") + ".sql.gz"
 			backupName = basepath + "backup/database/" + fileName
-			class.ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec -T mysql mysqldump -uroot -p` + MysqlPassword + ` ` + WebSiteBuckupSelectString + ` |gzip >` + backupName)
+			class.ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec -T mysql mysqldump -h` + MysqlHost + ` -uroot -p` + MysqlPassword + ` ` + WebSiteBuckupSelectString + ` |gzip >` + backupName)
 			fmt.Println("数据库备份成功，备份在" + backupName)
 
 			fileName = WebSiteBuckupSelectString + "_" + time.Now().Format("20060102150405") + ".tar.gz"

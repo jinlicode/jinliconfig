@@ -22,7 +22,7 @@ func MysqlInfo(YamlFile string) []string {
 }
 
 //在数据库执行sql语句
-func MysqlQuery(MysqlHost string, MysqlUser string, MysqlPassword string, DatabaseName string, QuerySql string) {
+func MysqlQuery(MysqlHost string, MysqlUser string, MysqlPassword string, DatabaseName string, QuerySQL string) {
 	//数据库配置
 
 	port := "3306"
@@ -37,10 +37,12 @@ func MysqlQuery(MysqlHost string, MysqlUser string, MysqlPassword string, Databa
 	//验证连接
 	if err := DB.Ping(); err != nil {
 		fmt.Println("opon database fail")
+	} else {
+		//执行查询
+		Databases, _ := DB.Query(QuerySQL)
+		defer Databases.Close()
 	}
-	//执行查询
-	Databases, _ := DB.Query(QuerySql)
-	defer Databases.Close()
+
 }
 
 //读取数据库内容
@@ -86,19 +88,15 @@ func MysqlGetDatabases(MysqlHost string, MysqlUser string, MysqlPassword string)
 
 //CreateDatabase 创建数据库并创建对应的用户
 func CreateDatabase(basepath string, rootPass string, username string, dataName string, dataPwd string) {
-	mysqlCommand := ""
 
 	//创建数据库
-	mysqlCommand = `create database ` + dataName + ` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci`
-	ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec mysql bash -c "mysql -uroot -p` + rootPass + ` -e '` + mysqlCommand + `'"`)
+	MysqlHost := ReadMysqlHost(basepath)
+	MysqlQuery(MysqlHost, "root", rootPass, "mysql", "create database "+dataName+" DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci")
 
 	//先删用户
-	mysqlCommand = `drop user \"` + username + `\"@\"%\"`
-	ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec mysql bash -c "mysql -uroot -p` + rootPass + ` -e '` + mysqlCommand + `'"`)
+	MysqlQuery(MysqlHost, "root", rootPass, "mysql", "drop user if exists '"+username+"'@'%'")
 
 	//创建用户
-	mysqlCommand = `grant all privileges on ` + dataName + `.* to \"` + username + `\"@\"%\" identified by \"` + dataPwd + `\"`
-	ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec mysql bash -c "mysql -uroot -p` + rootPass + ` -e '` + mysqlCommand + `'"`)
-
-	ExecLinuxCommand(`cd ` + basepath + ` && docker-compose exec mysql bash -c "mysql -uroot -p` + rootPass + ` -e 'flush privileges'"`)
+	MysqlQuery(MysqlHost, "root", rootPass, "mysql", "grant all privileges on "+dataName+".* to '"+username+"'@'%' identified by '"+dataPwd+"'")
+	MysqlQuery(MysqlHost, "root", rootPass, "mysql", "flush privileges")
 }
