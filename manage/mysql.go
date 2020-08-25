@@ -27,6 +27,14 @@ reSelectPhpMyAdmin:
 		class.PrintHr()
 		goto reSelectPhpMyAdmin
 	case "重置root密码":
+
+		ReConfirm := class.ConsoleUserConfirm("确定重置root密码吗？")
+
+		if ReConfirm != true {
+			fmt.Println("已取消操作")
+			return false
+		}
+		
 		newPass := MysqlRootEditPass(basepath)
 		if newPass != "" {
 			class.PrintHr()

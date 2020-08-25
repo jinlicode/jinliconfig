@@ -140,6 +140,7 @@ CreateNewSiteFlag:
 		case "权限修复":
 			class.ExecLinuxCommand("cd " + BASEPATH + "code && chown -R 10000:10000 *")
 			fmt.Println("权限修复成功")
+			goto ServiceSelectFlag
 		case "升级系统镜像":
 			fmt.Println("正在升级系统环境，预计需要5-15分钟.....")
 			class.ExecLinuxCommand("cd " + BASEPATH + " && " + "docker-compose pull" + " && " + "docker-compose restart")

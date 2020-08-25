@@ -212,6 +212,14 @@ WebConfigSelectFlag:
 		return false
 
 	case "重置" + WebServiceSelect + "数据库密码":
+
+		ReConfirm := class.ConsoleUserConfirm("确定重置" + WebServiceSelect + "数据库密码吗？")
+
+		if ReConfirm != true {
+			fmt.Println("已取消操作")
+			return false
+		}
+
 		newPass := MysqlSiteEditPass(basepath, MapKey)
 		if newPass != "" {
 			class.PrintHr()
@@ -256,6 +264,7 @@ WebConfigSelectFlag:
 		// fmt.Println("cd " + basepath + " && docker-compose stop " + strings.Replace(WebServiceSelect, ".", "_", -1))
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + strings.Replace(WebServiceSelect, ".", "_", -1))
 		fmt.Println("暂停成功")
+		goto WebConfigSelectFlag
 
 	case "删除" + WebServiceSelect + "的网站(不删除数据)":
 		//确定是否需要删除
@@ -281,6 +290,7 @@ WebConfigSelectFlag:
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose exec nginx nginx -s reload")
 
 		fmt.Println("删除成功")
+		return false
 
 	case "删除" + WebServiceSelect + "的网站(删除数据，包含数据库和程序)":
 		//确定是否需要删除
@@ -312,6 +322,7 @@ WebConfigSelectFlag:
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose exec nginx nginx -s reload")
 
 		fmt.Println("删除成功")
+		return false
 
 	}
 
