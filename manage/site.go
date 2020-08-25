@@ -251,6 +251,7 @@ WebConfigSelectFlag:
 
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose restart " + strings.Replace(WebServiceSelect, ".", "_", -1))
 		fmt.Println("重启成功")
+		return false
 
 	case "暂停" + WebServiceSelect + "网站服务":
 		//确定是否需要暂停
@@ -264,7 +265,7 @@ WebConfigSelectFlag:
 		// fmt.Println("cd " + basepath + " && docker-compose stop " + strings.Replace(WebServiceSelect, ".", "_", -1))
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + strings.Replace(WebServiceSelect, ".", "_", -1))
 		fmt.Println("暂停成功")
-		goto WebConfigSelectFlag
+		return false
 
 	case "删除" + WebServiceSelect + "的网站(不删除数据)":
 		//确定是否需要删除
