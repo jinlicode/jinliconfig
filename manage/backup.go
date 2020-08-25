@@ -65,6 +65,10 @@ func BackupSiteManage(basepath string, ExistSiteSlice []string) bool {
 	WebBuckupSelectOption := []string{}
 	WebBuckupSelectOption = append(ExistSiteSlice, "返回上层")
 	WebBuckupSelect := class.ConsoleOptionsSelect("请选择您需要备份的网站", WebBuckupSelectOption, "请输入选项")
+	if WebBuckupSelect == "interrupt" {
+		fmt.Println("您已强制退出")
+		os.Exit(1)
+	}
 
 	switch WebBuckupSelect {
 	case "返回上层":

@@ -21,6 +21,7 @@ func ConsoleOptionsSelect(msg string, Opt []string, help string) string {
 		Help:    help,
 	}
 	aaa := survey.AskOne(prompt, &color)
+
 	if aaa != nil {
 		return aaa.Error()
 	} else {
@@ -36,7 +37,7 @@ func ConsoleUserInput(msg string) string {
 	}
 	bbb := survey.AskOne(prompt, &name)
 
-	if name == "interrupt" {
+	if name == "interrupt" || name == "" {
 		fmt.Println("您已强制退出")
 		os.Exit(1)
 		return ""

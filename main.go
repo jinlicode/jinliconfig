@@ -121,6 +121,10 @@ CreateNewSiteFlag:
 				manage.CreateSite(BASEPATH, DockerComposeYamlMap, SiteNetMax)
 
 			case WebServiceSelect:
+				if WebServiceSelect == "interrupt" {
+					fmt.Println("您已强制退出")
+					os.Exit(1)
+				}
 				if manage.SiteManage(BASEPATH, WebServiceSelect, DockerComposeYamlMap) == false {
 					goto WebServiceSelectFlag
 				}
