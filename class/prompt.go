@@ -1,6 +1,11 @@
 package class
 
-import "github.com/AlecAivazis/survey/v2"
+import (
+	"fmt"
+	"os"
+
+	"github.com/AlecAivazis/survey/v2"
+)
 
 /*
 抽象出用户选择器需要输入三个函数,
@@ -30,6 +35,13 @@ func ConsoleUserInput(msg string) string {
 		Message: msg,
 	}
 	bbb := survey.AskOne(prompt, &name)
+
+	if name == "interrupt" {
+		fmt.Println("您已强制退出")
+		os.Exit(1)
+		return ""
+	}
+
 	if bbb != nil {
 		return bbb.Error()
 	} else {
