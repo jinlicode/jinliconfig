@@ -360,7 +360,10 @@ WebConfigSelectFlag:
 
 		//操作删除工作 删除代码目录  删除  数据库 drop database bbbbbbbb
 		MysqlPassword := class.ReadMysqlRootPassword(basepath)
-		class.ExecLinuxCommand("cd " + basepath + " && rm -rf " + basepath + "code/" + MapKey + " && docker-compose exec mysql bash -c \"mysql -uroot -p" + MysqlPassword + " -e 'drop database " + MapKey + "'\"")
+		class.ExecLinuxCommand("cd " + basepath + " && rm -rf " + basepath + "code/" + MapKey)
+		// && docker-compose exec mysql bash -c \"mysql -uroot -p" + MysqlPassword + " -e 'drop database " + MapKey + "'\""
+		MysqlRootHOST := class.ReadMysqlHost(basepath)
+		class.MysqlQuery(MysqlRootHOST, "root", MysqlPassword, "mysql", "drop database "+MapKey)
 
 		//删除对应的nginx配置
 		class.ExecLinuxCommand("rm " + basepath + "config/nginx/" + MapKey + ".conf")
