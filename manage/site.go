@@ -331,6 +331,8 @@ WebConfigSelectFlag:
 
 		//删除对应的nginx配置
 		class.ExecLinuxCommand("rm " + basepath + "config/nginx/" + MapKey + ".conf")
+		//删除对应的nginx配置
+		class.ExecLinuxCommand("rm " + basepath + "config/nginx_stop/" + MapKey + ".conf")
 
 		//重启nginx配置
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose exec nginx nginx -s reload")
@@ -363,6 +365,8 @@ WebConfigSelectFlag:
 
 		//删除对应的nginx配置
 		class.ExecLinuxCommand("rm " + basepath + "config/nginx/" + MapKey + ".conf")
+		//删除对应的nginx配置
+		class.ExecLinuxCommand("rm " + basepath + "config/nginx_stop/" + MapKey + ".conf")
 
 		//重启nginx配置
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose exec nginx nginx -s reload")
