@@ -6,7 +6,6 @@ import (
 	"jinliconfig/manage"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 )
 
@@ -70,26 +69,6 @@ CreateNewSiteFlag:
 		DockerComposeYamlRead := class.ReadFile(BASEPATH + "docker-compose.yaml")
 		DockerComposeYamlMap := class.YamlFileToMap(DockerComposeYamlRead)
 
-		//获取已经存在的网站
-		ExistSiteSlice := []string{}
-
-		//获取最大内网数
-		SiteNetMax := 2
-		for k, v := range DockerComposeYamlMap["services"].(map[string]interface{}) {
-			if k != "nginx" && k != "memcached" && k != "mysql" && k != "php" && k != "phpmyadmin" {
-				ExistSiteSlice = append(ExistSiteSlice, strings.Replace(k, "_", ".", -1))
-
-				//获取内网最大数字
-				max := strings.Split(v.(map[string]interface{})["networks"].(map[string]interface{})["jinli_net"].(map[string]interface{})["ipv4_address"].(string), ".")
-				maxNumString := max[3]
-
-				maxNum, err := strconv.Atoi(maxNumString)
-
-				if err == nil && SiteNetMax < maxNum {
-					SiteNetMax = maxNum
-				}
-			}
-		}
 		// fmt.Println(ExistSiteSlice)
 		// fmt.Printf("%v\n", DockerComposeYamlMap["networks"].(map[string]interface{})["jinli_net"])
 
@@ -110,6 +89,18 @@ CreateNewSiteFlag:
 		case "网站服务":
 			//网站服务选择主菜单
 		WebServiceSelectFlag:
+
+			//获取已经存在的网站
+			ExistSiteSlice := []string{}
+			// ExistStopSiteSlice := []string{}
+
+			ExistSiteSlice = class.GetPathFiles(BASEPATH + "config/nginx/")
+			// ExistStopSiteSlice = class.GetPathFiles(BASEPATH + "config/nginx_stop/")
+			for k, v := range ExistSiteSlice {
+				ExistSiteSlice[k] = strings.Replace(v, ".conf", "", -1)
+				ExistSiteSlice[k] = strings.Replace(ExistSiteSlice[k], "_", ".", -1)
+			}
+
 			WebServiceSelectOption := []string{}
 			WebServiceSelectOption = append(ExistSiteSlice, "新增网站", "返回上层")
 			WebServiceSelect := class.ConsoleOptionsSelect("请选择您需要管理的网站", WebServiceSelectOption, "请输入选项")
@@ -118,7 +109,7 @@ CreateNewSiteFlag:
 				fmt.Println("返回上层")
 				goto ServiceSelectFlag
 			case "新增网站":
-				manage.CreateSite(BASEPATH, DockerComposeYamlMap, SiteNetMax)
+				manage.CreateSite(BASEPATH, DockerComposeYamlMap)
 
 			case WebServiceSelect:
 				if WebServiceSelect == "interrupt" {
@@ -131,6 +122,14 @@ CreateNewSiteFlag:
 			}
 
 		case "备份管理":
+
+			//获取已经存在的网站
+			ExistSiteSlice := []string{}
+			ExistSiteSlice = class.GetPathFiles(BASEPATH + "config/nginx/")
+			for k, v := range ExistSiteSlice {
+				ExistSiteSlice[k] = strings.Replace(v, ".conf", "", -1)
+				ExistSiteSlice[k] = strings.Replace(ExistSiteSlice[k], "_", ".", -1)
+			}
 
 			if manage.BackupSiteManage(BASEPATH, ExistSiteSlice) == false {
 				goto ServiceSelectFlag

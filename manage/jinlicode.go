@@ -38,6 +38,9 @@ func InstallJinliCode(basepath string, jinliVersion float32) bool {
 		//创建各配置项目录
 		class.ExecLinuxCommand("mkdir " + basepath + "config/ && mkdir " + basepath + "config/cert/ && mkdir " + basepath + "config/mysql/ && mkdir " + basepath + "config/nginx/ && mkdir " + basepath + "config/php/")
 
+		//创建nginx网址停止目录
+		class.ExecLinuxCommand("mkdir " + basepath + "config/nginx_stop/")
+
 		//创建备份目录
 		class.ExecLinuxCommand("mkdir " + basepath + "backup/")
 		class.ExecLinuxCommand("mkdir " + basepath + "backup/database")

@@ -10,7 +10,7 @@ import (
 )
 
 //CreateSite 创建新网站
-func CreateSite(basepath string, DockerComposeYamlMap map[string]interface{}, SiteNetMax int) {
+func CreateSite(basepath string, DockerComposeYamlMap map[string]interface{}) {
 ReInputSiteDomainFlag:
 	NewSiteDomain := class.ConsoleUserInput("请输入您需要添加的域名：")
 	NewSiteDomain = strings.TrimSpace(NewSiteDomain)
@@ -96,8 +96,18 @@ ReInputSiteDomainFlag:
 	//替换域名
 	SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "www_example_com", newDomain, -1)
 
+	SiteNetMap := class.GetComposeSiteNetMap(basepath)
+
+	SiteNetMax := 2
+	for i := 2; i <= 255; i++ {
+		if _, ok := SiteNetMap[i]; !ok {
+			SiteNetMax = i
+			break
+		}
+	}
+
 	//替换内网ip
-	SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "ipv4_address: 10.99.2.2", "ipv4_address: 10.99.2."+strconv.Itoa(SiteNetMax+1), -1)
+	SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "ipv4_address: 10.99.2.2", "ipv4_address: 10.99.2."+strconv.Itoa(SiteNetMax), -1)
 
 	//替换php版本
 	SitePhpVersionCompose = strings.Replace(SitePhpVersionCompose, "jinlicode/php:latest", "jinlicode/php:v"+NewSitePhpVersion, 1)
