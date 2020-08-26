@@ -6,6 +6,8 @@ import (
 	"log"
 	"math/rand"
 	"regexp"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -110,4 +112,27 @@ func GetPathFiles(path string) []string {
 		fs = append(fs, f.Name())
 	}
 	return fs
+}
+
+//GetComposeSiteNetMap 获取网站所有内网最后ip
+func GetComposeSiteNetMap(basepath string) map[int]int {
+	DockerComposeYamlRead := ReadFile(basepath + "docker-compose.yaml")
+	DockerComposeYamlMap := YamlFileToMap(DockerComposeYamlRead)
+
+	netMap := make(map[int]int)
+	for k, v := range DockerComposeYamlMap["services"].(map[string]interface{}) {
+		if k != "nginx" && k != "mysql" && k != "phpmyadmin" {
+			//获取内网数字
+			netString := v.(map[string]interface{})["networks"].(map[string]interface{})["jinli_net"].(map[string]interface{})["ipv4_address"].(string)
+			if strings.Index(netString, "10.99.2") != -1 {
+				netNumSlice := strings.Split(netString, ".")
+				maxNumString := netNumSlice[3]
+				netNum, err := strconv.Atoi(maxNumString)
+				if err == nil {
+					netMap[netNum] = netNum
+				}
+			}
+		}
+	}
+	return netMap
 }
