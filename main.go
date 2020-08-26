@@ -92,17 +92,25 @@ CreateNewSiteFlag:
 
 			//获取已经存在的网站
 			ExistSiteSlice := []string{}
-			// ExistStopSiteSlice := []string{}
+			ExistStopSiteSlice := []string{}
 
 			ExistSiteSlice = class.GetPathFiles(BASEPATH + "config/nginx/")
-			// ExistStopSiteSlice = class.GetPathFiles(BASEPATH + "config/nginx_stop/")
+			ExistStopSiteSlice = class.GetPathFiles(BASEPATH + "config/nginx_stop/")
+
 			for k, v := range ExistSiteSlice {
 				ExistSiteSlice[k] = strings.Replace(v, ".conf", "", -1)
 				ExistSiteSlice[k] = strings.Replace(ExistSiteSlice[k], "_", ".", -1)
 			}
 
+			for k, v := range ExistStopSiteSlice {
+				ExistStopSiteSlice[k] = strings.Replace(v, ".conf", "", -1)
+				ExistStopSiteSlice[k] = strings.Replace(ExistStopSiteSlice[k], "_", ".", -1) + "（已暂停）"
+			}
+
 			WebServiceSelectOption := []string{}
-			WebServiceSelectOption = append(ExistSiteSlice, "新增网站", "返回上层")
+			WebServiceSelectOption = append(ExistSiteSlice, ExistStopSiteSlice...)
+			WebServiceSelectOption = append(WebServiceSelectOption, "新增网站", "返回上层")
+
 			WebServiceSelect := class.ConsoleOptionsSelect("请选择您需要管理的网站", WebServiceSelectOption, "请输入选项")
 			switch WebServiceSelect {
 			case "返回上层":

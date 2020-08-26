@@ -193,19 +193,41 @@ ReInputSiteDomainFlag:
 
 // SiteManage 网站管理
 func SiteManage(basepath string, WebServiceSelect string, DockerComposeYamlMap map[string]interface{}) bool {
-	WebConfigSelect := class.ConsoleOptionsSelect("请选择您需要管理的网站服务", []string{
-		// WebServiceSelect + "的" + "nginx配置",
-		// WebServiceSelect + "的" + "php配置",
-		// WebServiceSelect + "的" + "数据库配置",
-		"查看" + WebServiceSelect + "数据库信息",
-		"重置" + WebServiceSelect + "数据库密码",
-		"重启" + WebServiceSelect + "网站服务",
-		"暂停" + WebServiceSelect + "网站服务",
-		"删除" + WebServiceSelect + "的网站(不删除数据)",
-		"删除" + WebServiceSelect + "的网站(删除数据，包含数据库和程序)",
-		"返回上层"}, "请输入选项")
 
-	MapKey := strings.Replace(WebServiceSelect, ".", "_", -1)
+	WebConfigSelect := ""
+	MapKey := ""
+
+	if strings.Index(WebServiceSelect, "（已暂停）") == -1 {
+
+		WebConfigSelect = class.ConsoleOptionsSelect("请选择您需要管理的网站服务", []string{
+			// WebServiceSelect + "的" + "nginx配置",
+			// WebServiceSelect + "的" + "php配置",
+			// WebServiceSelect + "的" + "数据库配置",
+			"查看" + WebServiceSelect + "数据库信息",
+			"重置" + WebServiceSelect + "数据库密码",
+			"暂停" + WebServiceSelect + "网站服务",
+			"删除" + WebServiceSelect + "的网站(不删除数据)",
+			"删除" + WebServiceSelect + "的网站(删除数据，包含数据库和程序)",
+			"返回上层"}, "请输入选项")
+
+		MapKey = strings.Replace(WebServiceSelect, ".", "_", -1)
+	} else {
+
+		WebConfigSelect = class.ConsoleOptionsSelect("请选择您需要管理的网站服务", []string{
+			// WebServiceSelect + "的" + "nginx配置",
+			// WebServiceSelect + "的" + "php配置",
+			// WebServiceSelect + "的" + "数据库配置",
+			"查看" + WebServiceSelect + "数据库信息",
+			"重置" + WebServiceSelect + "数据库密码",
+			"重启" + WebServiceSelect + "网站服务",
+			"删除" + WebServiceSelect + "的网站(不删除数据)",
+			"删除" + WebServiceSelect + "的网站(删除数据，包含数据库和程序)",
+			"返回上层"}, "请输入选项")
+
+		MapKey = strings.Replace(WebServiceSelect, ".", "_", -1)
+		MapKey = strings.Replace(MapKey, "（已暂停）", "", -1)
+
+	}
 
 	//网站内服务修改主菜单
 WebConfigSelectFlag:
@@ -259,7 +281,13 @@ WebConfigSelectFlag:
 			return false
 		}
 
-		class.ExecLinuxCommand("cd " + basepath + " && docker-compose restart " + strings.Replace(WebServiceSelect, ".", "_", -1))
+		//执行conf文件移动到nginx目录
+		nginxConfName := strings.Replace(WebServiceSelect, ".", "_", -1)
+		nginxConfName = strings.Replace(nginxConfName, "（已暂停）", "", -1)
+		class.ExecLinuxCommand("mv " + basepath + "config/nginx_stop/" + nginxConfName + ".conf " + basepath + "config/nginx/" + nginxConfName + ".conf")
+
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose restart " + nginxConfName)
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose exec nginx nginx -s reload")
 		fmt.Println("重启成功")
 		return false
 
@@ -274,6 +302,13 @@ WebConfigSelectFlag:
 		//输入命令 暂停容器
 		// fmt.Println("cd " + basepath + " && docker-compose stop " + strings.Replace(WebServiceSelect, ".", "_", -1))
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + strings.Replace(WebServiceSelect, ".", "_", -1))
+		//执行容器暂停操作 防止系统重启之后再起来
+		class.ExecLinuxCommand("docker update --restart=\"no\"" + strings.Replace(WebServiceSelect, ".", "_", -1))
+		//执行conf文件回收到nginx_stop目录
+		nginxConfName := strings.Replace(WebServiceSelect, ".", "_", -1)
+		class.ExecLinuxCommand("mv " + basepath + "config/nginx/" + nginxConfName + ".conf " + basepath + "config/nginx_stop/" + nginxConfName + ".conf")
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose exec nginx nginx -s reload")
+
 		fmt.Println("暂停成功")
 		return false
 
