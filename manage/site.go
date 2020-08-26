@@ -348,7 +348,6 @@ WebConfigSelectFlag:
 			return false
 		}
 		//输入命令 删除yaml中服务
-		MapKey := strings.Replace(WebServiceSelect, ".", "_", -1)
 		// fmt.Println("cd " + basepath + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
 
