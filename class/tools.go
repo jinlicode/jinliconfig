@@ -2,6 +2,8 @@ package class
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"math/rand"
 	"regexp"
 	"time"
@@ -95,4 +97,17 @@ func ReadSiteMysqlInfo(basepath string, dockerName string, readType string) stri
 // PrintHr 打印一行等号
 func PrintHr() {
 	fmt.Println("\n====================================")
+}
+
+// getPathFiles 获取木下的所有文件切片
+func getPathFiles(path string) []string {
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fs := []string{}
+	for _, f := range files {
+		fs = append(fs, f.Name())
+	}
+	return fs
 }
