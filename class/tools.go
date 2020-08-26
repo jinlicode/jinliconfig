@@ -99,8 +99,8 @@ func PrintHr() {
 	fmt.Println("\n====================================")
 }
 
-// getPathFiles 获取木下的所有文件切片
-func getPathFiles(path string) []string {
+// GetPathFiles 获取木下的所有文件切片
+func GetPathFiles(path string) []string {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		log.Fatal(err)
