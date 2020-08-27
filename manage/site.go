@@ -81,8 +81,14 @@ ReInputSiteDomainFlag:
 		"7.3-sec",
 	}, "请输入选项")
 
+	//redis
+	NewSiteRedis := class.ConsoleOptionsSelect("是否使用 Redis", []string{"是", "否"}, "请输入选项")
+
+	//memcached
+	NewSiteMemcached := class.ConsoleOptionsSelect("是否使用 Memcached", []string{"是", "否"}, "请输入选项")
+
 	//再回显一次输入的内容判断是否真的要开始安装
-	LastReConfirm := class.ConsoleUserConfirm("\n域名：[" + NewSiteDomain + "]\n是否启用https：[" + NewSiteHTTPS + "]\nphp版本：[" + NewSitePhpVersion + "]\n确定是否立即安装")
+	LastReConfirm := class.ConsoleUserConfirm("\n域名：[" + NewSiteDomain + "]\n是否启用https：[" + NewSiteHTTPS + "]\nphp版本：[" + NewSitePhpVersion + "]\n是否使用Redis：[" + NewSiteRedis + "]\n是否使用Memcached：[" + NewSiteMemcached + "]\n确定是否立即安装")
 	if LastReConfirm != true {
 		fmt.Println("已取消操作")
 		os.Exit(3)
@@ -129,6 +135,31 @@ ReInputSiteDomainFlag:
 	//插入到总的yaml文件中
 	DockerComposeYamlMap["services"].(map[string]interface{})[newDomain] = NewSitePhpVersionComposeMap
 
+	//如果勾选redis
+	if NewSiteRedis == "是" {
+		//获取redis 镜像模版
+		SitePhpRedisCompose := Template.DockerComposeRedis()
+
+		//替换redis 内网
+		SitePhpRedisCompose = strings.Replace(SitePhpRedisCompose, "container_name: redis", "container_name: "+newDomain+"_redis", -1)
+		SitePhpRedisCompose = strings.Replace(SitePhpRedisCompose, "ipv4_address: 10.99.5.2", "ipv4_address: 10.99.5."+strconv.Itoa(SiteNetMax), -1)
+		SitePhpRedisComposeMap := class.YamlFileToMap(SitePhpRedisCompose)
+		DockerComposeYamlMap["services"].(map[string]interface{})[newDomain+"_redis"] = SitePhpRedisComposeMap
+
+	}
+
+	//如果勾选Memcached
+	if NewSiteMemcached == "是" {
+		//获取Memcached 镜像模版
+		SiteMemcachedCompose := Template.DockerComposeMemcached()
+		//替换Memcached 内网
+		SiteMemcachedCompose = strings.Replace(SiteMemcachedCompose, "container_name: memcached", "container_name: "+newDomain+"_memcached", -1)
+		SiteMemcachedCompose = strings.Replace(SiteMemcachedCompose, "ipv4_address: 10.99.4.2", "ipv4_address: 10.99.4."+strconv.Itoa(SiteNetMax), -1)
+		SitePhpRedisComposeMap := class.YamlFileToMap(SiteMemcachedCompose)
+		DockerComposeYamlMap["services"].(map[string]interface{})[newDomain+"_memcached"] = SitePhpRedisComposeMap
+
+	}
+
 	//自动创建以网站名字命名的程序目录
 	class.ExecLinuxCommand("mkdir " + basepath + "code/" + newDomain)
 	class.ExecLinuxCommand("mkdir " + basepath + "config/php/" + newDomain)
@@ -167,6 +198,18 @@ ReInputSiteDomainFlag:
 
 	//启动新网站服务
 	class.ExecLinuxCommand("cd " + basepath + " && docker-compose up -d " + newDomain)
+
+	//如果勾选redis
+	if NewSiteRedis == "是" {
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose up -d " + newDomain + "_redis")
+	}
+
+	//如果勾选Memcached
+	if NewSiteMemcached == "是" {
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose up -d " + newDomain + "_memcched")
+
+	}
+
 	//重启nginx 配置
 	class.ExecLinuxCommand("cd " + basepath + " && docker-compose exec nginx nginx -s reload")
 
