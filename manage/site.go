@@ -206,7 +206,7 @@ ReInputSiteDomainFlag:
 
 	//如果勾选Memcached
 	if NewSiteMemcached == "是" {
-		class.ExecLinuxCommand("cd " + basepath + " && docker-compose up -d " + newDomain + "_memcched")
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose up -d " + newDomain + "_memcached")
 
 	}
 
@@ -256,6 +256,8 @@ func SiteManage(basepath string, WebServiceSelect string, DockerComposeYamlMap m
 		MapKey = strings.Replace(WebServiceSelect, ".", "_", -1)
 	} else {
 
+		WebServiceSelect = strings.Replace(WebServiceSelect, "（已暂停）", "", -1)
+
 		WebConfigSelect = class.ConsoleOptionsSelect("请选择您需要管理的网站服务", []string{
 			// WebServiceSelect + "的" + "nginx配置",
 			// WebServiceSelect + "的" + "php配置",
@@ -268,7 +270,6 @@ func SiteManage(basepath string, WebServiceSelect string, DockerComposeYamlMap m
 			"返回上层"}, "请输入选项")
 
 		MapKey = strings.Replace(WebServiceSelect, ".", "_", -1)
-		MapKey = strings.Replace(MapKey, "（已暂停）", "", -1)
 
 	}
 
@@ -325,11 +326,11 @@ WebConfigSelectFlag:
 		}
 
 		//执行conf文件移动到nginx目录
-		nginxConfName := strings.Replace(WebServiceSelect, ".", "_", -1)
-		nginxConfName = strings.Replace(nginxConfName, "（已暂停）", "", -1)
-		class.ExecLinuxCommand("mv " + basepath + "config/nginx_stop/" + nginxConfName + ".conf " + basepath + "config/nginx/" + nginxConfName + ".conf")
+		class.ExecLinuxCommand("mv " + basepath + "config/nginx_stop/" + MapKey + ".conf " + basepath + "config/nginx/" + MapKey + ".conf")
 
-		class.ExecLinuxCommand("cd " + basepath + " && docker-compose restart " + nginxConfName)
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose restart " + MapKey)
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose restart " + MapKey + "_redis")
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose restart " + MapKey + "_memcached")
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose exec nginx nginx -s reload")
 		fmt.Println("重启成功")
 		return false
@@ -344,12 +345,12 @@ WebConfigSelectFlag:
 
 		//输入命令 暂停容器
 		// fmt.Println("cd " + basepath + " && docker-compose stop " + strings.Replace(WebServiceSelect, ".", "_", -1))
-		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + strings.Replace(WebServiceSelect, ".", "_", -1))
-		//执行容器暂停操作 防止系统重启之后再起来
-		class.ExecLinuxCommand("docker update --restart=\"no\"" + strings.Replace(WebServiceSelect, ".", "_", -1))
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey)
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey + "_redis")
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey + "_memcached")
+
 		//执行conf文件回收到nginx_stop目录
-		nginxConfName := strings.Replace(WebServiceSelect, ".", "_", -1)
-		class.ExecLinuxCommand("mv " + basepath + "config/nginx/" + nginxConfName + ".conf " + basepath + "config/nginx_stop/" + nginxConfName + ".conf")
+		class.ExecLinuxCommand("mv " + basepath + "config/nginx/" + MapKey + ".conf " + basepath + "config/nginx_stop/" + MapKey + ".conf")
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose exec nginx nginx -s reload")
 
 		fmt.Println("暂停成功")
@@ -364,9 +365,13 @@ WebConfigSelectFlag:
 		}
 		//输入命令 删除yaml中服务
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey + "_redis && docker-compose rm " + MapKey + "_redis")
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey + "_memcached && docker-compose rm " + MapKey + "_memcached")
 
 		//执行完之后删除yaml中对应的map
 		delete(DockerComposeYamlMap["services"].(map[string]interface{}), MapKey)
+		delete(DockerComposeYamlMap["services"].(map[string]interface{}), MapKey+"_redis")
+		delete(DockerComposeYamlMap["services"].(map[string]interface{}), MapKey+"_memcached")
 
 		//重新写入到yaml
 		NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
@@ -393,9 +398,13 @@ WebConfigSelectFlag:
 		//输入命令 删除yaml中服务
 		// fmt.Println("cd " + basepath + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey + " && docker-compose rm " + MapKey)
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey + "_redis && docker-compose rm " + MapKey + "_redis")
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey + "_memcached && docker-compose rm " + MapKey + "_memcached")
 
 		//执行完之后删除yaml中对应的map
 		delete(DockerComposeYamlMap["services"].(map[string]interface{}), MapKey)
+		delete(DockerComposeYamlMap["services"].(map[string]interface{}), MapKey+"_redis")
+		delete(DockerComposeYamlMap["services"].(map[string]interface{}), MapKey+"_memcached")
 
 		//重新写入到yaml
 		NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
