@@ -49,7 +49,7 @@ func DockerComposePhp() string {
         - ./config/php/www_example_com/php-fpm.conf:/usr/local/etc/php-fpm.conf
         - ./config/php/www_example_com/www.conf:/usr/local/etc/php-fpm.d/www.conf
         - ./log/openrasp/www_example_com:/opt/rasp/logs/alarm
-    restart: always
+    restart: unless-stopped
     expose:
         - "9000"
     environment:
@@ -89,7 +89,7 @@ func DockerComposeMysql() string {
 func DockerComposeMemcached() string {
 	Memcached := `
     image: registry.cn-beijing.aliyuncs.com/jinlicode/memcached:1.6.6
-    restart: always
+    restart: unless-stopped
     container_name: memcached
     expose:
     - "11211"
@@ -105,7 +105,7 @@ func DockerComposeMemcached() string {
 func DockerComposeRedis() string {
 	Redis := `
     image: registry.cn-beijing.aliyuncs.com/jinlicode/redis:5.0.9
-    restart: always
+    restart: unless-stopped
     container_name: redis
     expose:
     - "6379"
