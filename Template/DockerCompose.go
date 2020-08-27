@@ -88,7 +88,6 @@ func DockerComposeMysql() string {
 }
 func DockerComposeMemcached() string {
 	Memcached := `
-  memcached:
     image: registry.cn-beijing.aliyuncs.com/jinlicode/memcached:1.6.6
     restart: always
     container_name: memcached
@@ -100,12 +99,11 @@ func DockerComposeMemcached() string {
     networks:
       jinli_net:
         ipv4_address: 10.99.4.2
-  `
+`
 	return Memcached
 }
 func DockerComposeRedis() string {
 	Redis := `
-  redis:
     image: registry.cn-beijing.aliyuncs.com/jinlicode/redis:5.0.9
     restart: always
     container_name: redis
@@ -116,7 +114,7 @@ func DockerComposeRedis() string {
     networks:
       jinli_net:
         ipv4_address: 10.99.5.2
-  `
+`
 	return Redis
 }
 func DockerComposePhpmyadmin() string {
