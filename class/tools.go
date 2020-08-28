@@ -102,14 +102,20 @@ func PrintHr() {
 }
 
 // GetPathFiles 获取木下的所有文件切片
-func GetPathFiles(path string) []string {
+func GetPathFiles(path string, isDir bool) []string {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fs := []string{}
 	for _, f := range files {
-		fs = append(fs, f.Name())
+		if isDir == true {
+			if f.IsDir() == true {
+				fs = append(fs, f.Name())
+			}
+		} else {
+			fs = append(fs, f.Name())
+		}
 	}
 	return fs
 }

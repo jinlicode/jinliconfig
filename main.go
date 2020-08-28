@@ -95,8 +95,8 @@ CreateNewSiteFlag:
 			ExistSiteSlice := []string{}
 			ExistStopSiteSlice := []string{}
 
-			ExistSiteSlice = class.GetPathFiles(BASEPATH + "config/nginx/")
-			ExistStopSiteSlice = class.GetPathFiles(BASEPATH + "config/nginx_stop/")
+			ExistSiteSlice = class.GetPathFiles(BASEPATH+"config/nginx/", false)
+			ExistStopSiteSlice = class.GetPathFiles(BASEPATH+"config/nginx_stop/", false)
 
 			for k, v := range ExistSiteSlice {
 				ExistSiteSlice[k] = strings.Replace(v, ".conf", "", -1)
@@ -134,7 +134,7 @@ CreateNewSiteFlag:
 
 			//获取已经存在的网站
 			ExistSiteSlice := []string{}
-			ExistSiteSlice = class.GetPathFiles(BASEPATH + "config/nginx/")
+			ExistSiteSlice = class.GetPathFiles(BASEPATH+"config/nginx/", false)
 			for k, v := range ExistSiteSlice {
 				ExistSiteSlice[k] = strings.Replace(v, ".conf", "", -1)
 				ExistSiteSlice[k] = strings.Replace(ExistSiteSlice[k], "_", ".", -1)
