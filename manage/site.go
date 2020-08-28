@@ -81,6 +81,13 @@ ReInputSiteDomainFlag:
 		"7.3-sec",
 	}, "请输入选项")
 
+	//是否写入伪静态
+	NewSiteRewrite := class.ConsoleOptionsSelect("请选择您程序的伪静态", []string{
+		"不使用",
+		"Thinkphp 伪静态",
+		"Discuz 伪静态",
+	}, "请输入选项")
+
 	//redis
 	NewSiteRedis := class.ConsoleOptionsSelect("是否使用 Redis", []string{"是", "否"}, "请输入选项")
 
@@ -88,7 +95,7 @@ ReInputSiteDomainFlag:
 	NewSiteMemcached := class.ConsoleOptionsSelect("是否使用 Memcached", []string{"是", "否"}, "请输入选项")
 
 	//再回显一次输入的内容判断是否真的要开始安装
-	LastReConfirm := class.ConsoleUserConfirm("\n域名：[" + NewSiteDomain + "]\n是否启用https：[" + NewSiteHTTPS + "]\nphp版本：[" + NewSitePhpVersion + "]\n是否使用Redis：[" + NewSiteRedis + "]\n是否使用Memcached：[" + NewSiteMemcached + "]\n确定是否立即安装")
+	LastReConfirm := class.ConsoleUserConfirm("\n域名：[" + NewSiteDomain + "]\n是否启用https：[" + NewSiteHTTPS + "]\nphp版本：[" + NewSitePhpVersion + "]\n是否使用Redis：[" + NewSiteRedis + "]\n是否使用Memcached：[" + NewSiteMemcached + "]\n伪静态状态：[" + NewSiteRewrite + "]\n确定是否立即安装")
 	if LastReConfirm != true {
 		fmt.Println("已取消操作")
 		os.Exit(3)
@@ -190,6 +197,19 @@ ReInputSiteDomainFlag:
 		TemplateNginxHTTPSString = strings.Replace(TemplateNginxHTTPSString, "php:9000", newDomain+":9000", -1)
 		class.WriteFile(basepath+"config/nginx/"+newDomain+".conf", TemplateNginxHTTPSString)
 
+	}
+
+	//写入伪静态
+	switch NewSiteRewrite {
+	case "不使用":
+		class.WriteFile(basepath+"config/rewrite/"+newDomain+".conf", "")
+		break
+	case "Thinkphp 伪静态":
+		class.WriteFile(basepath+"config/rewrite/"+newDomain+".conf", Template.TemplateNginxRewriteThinkphp())
+		break
+	case "Discuz 伪静态":
+		class.WriteFile(basepath+"config/rewrite/"+newDomain+".conf", Template.TemplateNginxRewriteDiscuz())
+		break
 	}
 
 	//写入docker-compose.yaml 文件
@@ -381,6 +401,8 @@ WebConfigSelectFlag:
 		class.ExecLinuxCommand("rm " + basepath + "config/nginx/" + MapKey + ".conf")
 		//删除对应的nginx配置
 		class.ExecLinuxCommand("rm " + basepath + "config/nginx_stop/" + MapKey + ".conf")
+		//删除重写文件
+		class.ExecLinuxCommand("rm " + basepath + "config/rewrite/" + MapKey + ".conf")
 
 		//重启nginx配置
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose exec nginx nginx -s reload")
@@ -421,6 +443,8 @@ WebConfigSelectFlag:
 		class.ExecLinuxCommand("rm " + basepath + "config/nginx/" + MapKey + ".conf")
 		//删除对应的nginx配置
 		class.ExecLinuxCommand("rm " + basepath + "config/nginx_stop/" + MapKey + ".conf")
+		//删除重写文件
+		class.ExecLinuxCommand("rm " + basepath + "config/rewrite/" + MapKey + ".conf")
 
 		//重启nginx配置
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose exec nginx nginx -s reload")

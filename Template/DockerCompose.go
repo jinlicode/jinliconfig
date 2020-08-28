@@ -27,6 +27,7 @@ func DockerComposeNginx() string {
         - ./code:/var/www
         - ./log/nginx/:/var/log/nginx
         - ./config/cert/:/etc/letsencrypt/
+        - ./config/rewrite/:/etc/nginx/rewrite/
     restart: always
     environment:
         - TZ=Asia/Shanghai

@@ -27,7 +27,9 @@ server {
     error_log /var/log/nginx/www_example_com_error.log;
 
 
-    # rewrite
+    #rewrite-start URL重写规则引用
+    include /etc/nginx/rewrite/www_example_com.conf;
+    #rewrite-end
 
     # additional config
     include /etc/nginx/jinli_nginx_base_config/general.conf;
@@ -77,7 +79,9 @@ server {
     access_log /var/log/nginx/www_example_com_access.log;
     error_log /var/log/nginx/www_example_com_error.log;
 
-    # rewrite
+    #rewrite-start URL重写规则引用
+    include /etc/nginx/rewrite/www_example_com.conf;
+    #rewrite-end
 
     # additional config
     include /etc/nginx/jinli_nginx_base_config/general.conf;
@@ -96,8 +100,10 @@ server {
 
 func TemplateNginxRewriteThinkphp() string {
 	RewriteThinkphp := `
-	location / {
-	try_files $uri $uri/ /index.php$uri;
+    location / {
+        if (!-e $request_filename){
+            rewrite  ^(.*)$  /index.php?s=$1  last;   break;
+        }
     }
 	`
 	return RewriteThinkphp
