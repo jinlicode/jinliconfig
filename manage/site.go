@@ -5,6 +5,7 @@ import (
 	"jinliconfig/Template"
 	"jinliconfig/class"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -267,6 +268,7 @@ func SiteManage(basepath string, WebServiceSelect string, DockerComposeYamlMap m
 			// WebServiceSelect + "的" + "php配置",
 			// WebServiceSelect + "的" + "数据库配置",
 			"查看" + WebServiceSelect + "数据库信息",
+			"更改" + WebServiceSelect + "的根目录",
 			"重置" + WebServiceSelect + "数据库密码",
 			"暂停" + WebServiceSelect + "网站服务",
 			"删除" + WebServiceSelect + "的网站(不删除数据)",
@@ -323,6 +325,39 @@ WebConfigSelectFlag:
 			class.PrintHr()
 
 		}
+		return false
+
+	case "更改" + WebServiceSelect + "的根目录":
+		//获取当前所有的目录
+		DirListSlice := class.GetPathFiles(basepath+"code/"+MapKey, true)
+		DirListSlice = append(DirListSlice, "/", "返回上层")
+
+		DirGenSelect := class.ConsoleOptionsSelect("请选择"+MapKey+"的跟目录", DirListSlice, "请输入选项")
+
+		if DirGenSelect != "返回上层" {
+			//替换nginx conf 更目录
+
+			oldConfString := class.ReadFile(basepath + "config/nginx/" + MapKey + ".conf")
+
+			parttern := `root(.*)\$base(.*)`
+			re, _ := regexp.Compile(parttern)
+			newConfString := ""
+			if DirGenSelect == "/" {
+				newConfString = re.ReplaceAllString(oldConfString, `root                    $$base;`)
+			} else {
+				newConfString = re.ReplaceAllString(oldConfString, `root                    $$base/`+DirGenSelect+`;`)
+			}
+
+			//重新写入文件
+			class.WriteFile(basepath+"config/nginx/"+MapKey+".conf", newConfString)
+
+			//重启nginx
+			class.ExecLinuxCommand("cd " + basepath + " && docker-compose exec nginx nginx -s reload")
+
+			fmt.Println("更改成功")
+
+		}
+
 		return false
 
 	case WebServiceSelect + "的" + "nginx配置":
