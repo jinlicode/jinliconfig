@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"jinliconfig/class"
+	"jinliconfig/gotop"
 	"jinliconfig/manage"
 	"os"
 	"os/exec"
@@ -84,7 +85,7 @@ CreateNewSiteFlag:
 
 		//服务选择主菜单
 	ServiceSelectFlag:
-		ServiceSelect := class.ConsoleOptionsSelect("请选择您需要的服务", []string{"网站服务", "备份管理", "数据库管理", "权限修复", "升级系统镜像", "退出"}, "请输入选项")
+		ServiceSelect := class.ConsoleOptionsSelect("请选择您需要的服务", []string{"网站服务", "备份管理", "数据库管理", "权限修复", "升级系统镜像", "服务器监控", "退出"}, "请输入选项")
 		switch ServiceSelect {
 		case "网站服务":
 			//网站服务选择主菜单
@@ -156,6 +157,20 @@ CreateNewSiteFlag:
 			fmt.Println("正在升级系统环境，预计需要5-15分钟.....")
 			class.ExecLinuxCommand("cd " + BASEPATH + " && " + "docker-compose pull" + " && " + "docker-compose restart")
 			// goto ServiceSelectFlag
+		case "服务器监控":
+			WebServiceTopSelect := class.ConsoleOptionsSelect("请选择您查看的监控服务", []string{"系统整体监控", "服务监控", "返回上层"}, "请选择选项")
+
+			switch WebServiceTopSelect {
+			case "系统整体监控":
+				gotop.GetGoTop()
+			case "服务监控":
+				class.ExecLinuxCommand("docker stats --format \"table {{.Name}}\t{{.CPUPerc}}  {{.MemUsage}}\t{{.NetIO}}\"")
+			case "返回上层":
+				goto ServiceSelectFlag
+
+			}
+			// goto WebServiceSelect //随便添加的一会删除
+
 		case "退出":
 			fmt.Println("退出")
 			break //可以添加
