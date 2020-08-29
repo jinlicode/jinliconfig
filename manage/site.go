@@ -13,7 +13,7 @@ import (
 //CreateSite 创建新网站
 func CreateSite(basepath string, DockerComposeYamlMap map[string]interface{}) {
 ReInputSiteDomainFlag:
-	NewSiteDomain := class.ConsoleUserInput("请输入您需要添加的域名：")
+	NewSiteDomain := class.ConsoleUserInput("请输入您需要添加的域名:")
 	NewSiteDomain = strings.TrimSpace(NewSiteDomain)
 
 	//检测网站域名是否输入正确
@@ -50,11 +50,11 @@ ReInputSiteDomainFlag:
 	if NewSiteHTTPS == "否" {
 		fmt.Println("您选择了没有https证书，如果选择错误请按Ctrl+C结束当前进程")
 	} else {
-		fmt.Println("您选择了没有https证书，我们将会自动为您创建HTTPS证书，请您先一步解析域名到您的服务器上，如果使用CDN请参考官方帮助文档：https://xxxxxxxxxxxxxxx")
+		fmt.Println("您选择了没有https证书，我们将会自动为您创建HTTPS证书，请您先一步解析域名到您的服务器上，如果使用CDN请参考官方帮助文档:https://xxxxxxxxxxxxxxx")
 
 	ReInputSiteEmailFlag:
 		//开始输入邮箱
-		NewSiteSSLEmail = class.ConsoleUserInput("请输入您的邮箱地址，此地址为了自动申请证书所用：")
+		NewSiteSSLEmail = class.ConsoleUserInput("请输入您的邮箱地址，此地址为了自动申请证书所用:")
 		NewSiteSSLEmail = strings.TrimSpace(NewSiteSSLEmail)
 
 		//检测邮箱是否输入正确
@@ -96,7 +96,7 @@ ReInputSiteDomainFlag:
 	NewSiteMemcached := class.ConsoleOptionsSelect("是否使用 Memcached", []string{"是", "否"}, "请输入选项")
 
 	//再回显一次输入的内容判断是否真的要开始安装
-	LastReConfirm := class.ConsoleUserConfirm("\n域名：[" + NewSiteDomain + "]\n是否启用https：[" + NewSiteHTTPS + "]\nphp版本：[" + NewSitePhpVersion + "]\n是否使用Redis：[" + NewSiteRedis + "]\n是否使用Memcached：[" + NewSiteMemcached + "]\n伪静态状态：[" + NewSiteRewrite + "]\n确定是否立即安装")
+	LastReConfirm := class.ConsoleUserConfirm("\n域名:[" + NewSiteDomain + "]\n是否启用https:[" + NewSiteHTTPS + "]\nphp版本:[" + NewSitePhpVersion + "]\n是否使用Redis:[" + NewSiteRedis + "]\n是否使用Memcached:[" + NewSiteMemcached + "]\n伪静态状态:[" + NewSiteRewrite + "]\n确定是否立即安装")
 	if LastReConfirm != true {
 		fmt.Println("已取消操作")
 		os.Exit(3)
@@ -246,10 +246,10 @@ ReInputSiteDomainFlag:
 
 	fmt.Println("\n=======================您的网站对应信息==========================")
 	fmt.Println("。请将您的网站代码上传至 【" + basepath + "code/" + newDomain + "】 目录")
-	fmt.Println("。数据库服务器地址：" + class.ReadMysqlHost(basepath))
-	fmt.Println("。数据库库名：" + newDomain)
-	fmt.Println("。数据库用户名：" + newDomain)
-	fmt.Println("。数据库密码：" + mysqlSiteRandPassword)
+	fmt.Println("。数据库服务器地址:" + class.ReadMysqlHost(basepath))
+	fmt.Println("。数据库库名:" + newDomain)
+	fmt.Println("。数据库用户名:" + newDomain)
+	fmt.Println("。数据库密码:" + mysqlSiteRandPassword)
 	fmt.Println("================================================================")
 
 	// fmt.Println(NewDockerComposeYamlString)
@@ -303,9 +303,10 @@ WebConfigSelectFlag:
 		return false
 	case "查看" + WebServiceSelect + "数据库信息":
 		class.PrintHr()
-		fmt.Println("数据库服务器地址：" + class.ReadMysqlHost(basepath))
-		fmt.Println(WebServiceSelect + "的数据库用户名：" + class.ReadSiteMysqlInfo(basepath, MapKey, "user"))
-		fmt.Println(WebServiceSelect + "的数据库密码：" + class.ReadSiteMysqlInfo(basepath, MapKey, "pass"))
+		fmt.Println("数据库服务器地址:" + class.ReadMysqlHost(basepath))
+		fmt.Println(WebServiceSelect + "的数据库名:" + MapKey)
+		fmt.Println(WebServiceSelect + "的数据库用户名:" + class.ReadSiteMysqlInfo(basepath, MapKey, "user"))
+		fmt.Println(WebServiceSelect + "的数据库密码:" + class.ReadSiteMysqlInfo(basepath, MapKey, "pass"))
 		class.PrintHr()
 		return false
 
@@ -321,7 +322,7 @@ WebConfigSelectFlag:
 		newPass := MysqlSiteEditPass(basepath, MapKey)
 		if newPass != "" {
 			class.PrintHr()
-			fmt.Println(WebServiceSelect + "的新数据库密码为：" + newPass)
+			fmt.Println(WebServiceSelect + "的新数据库密码为:" + newPass)
 			class.PrintHr()
 
 		}

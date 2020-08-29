@@ -106,9 +106,9 @@ func InstallJinliCode(basepath string, jinliVersion float32) bool {
 
 		//回显数据库密码
 		fmt.Println("\n=======================数据库ROOT信息===========================")
-		fmt.Println("。数据库服务器地址：" + class.ReadMysqlHost(basepath))
-		fmt.Println("。数据库用户名：root")
-		fmt.Println("。数据库密码：" + mysqlRandPassword)
+		fmt.Println("。数据库服务器地址:" + class.ReadMysqlHost(basepath))
+		fmt.Println("。数据库用户名:root")
+		fmt.Println("。数据库密码:" + mysqlRandPassword)
 		fmt.Println("================================================================")
 
 		return false

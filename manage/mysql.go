@@ -14,16 +14,16 @@ reSelectPhpMyAdmin:
 	case "开启":
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose up -d phpmyadmin")
 		class.PrintHr()
-		fmt.Println("phpmyadmin管理地址：您的服务器IP地址:8080")
-		fmt.Println("mysql用户名：root")
-		fmt.Println("mysql密码：" + class.ReadMysqlRootPassword(basepath))
+		fmt.Println("phpmyadmin管理地址:您的服务器IP地址:8080")
+		fmt.Println("mysql用户名:root")
+		fmt.Println("mysql密码:" + class.ReadMysqlRootPassword(basepath))
 		class.PrintHr()
 		goto reSelectPhpMyAdmin
 	case "查看配置":
 		class.PrintHr()
-		fmt.Println("phpmyadmin管理地址：您的服务器IP地址:8080")
-		fmt.Println("mysql用户名：root")
-		fmt.Println("mysql密码：" + class.ReadMysqlRootPassword(basepath))
+		fmt.Println("phpmyadmin管理地址:您的服务器IP地址:8080")
+		fmt.Println("mysql用户名:root")
+		fmt.Println("mysql密码:" + class.ReadMysqlRootPassword(basepath))
 		class.PrintHr()
 		goto reSelectPhpMyAdmin
 	case "重置root密码":
@@ -34,11 +34,11 @@ reSelectPhpMyAdmin:
 			fmt.Println("已取消操作")
 			return false
 		}
-		
+
 		newPass := MysqlRootEditPass(basepath)
 		if newPass != "" {
 			class.PrintHr()
-			fmt.Println("root新密码密码：" + newPass)
+			fmt.Println("root新密码密码:" + newPass)
 			class.PrintHr()
 		}
 		return false
