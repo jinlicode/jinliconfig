@@ -2,12 +2,16 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"jinliconfig/class"
 	"jinliconfig/gotop"
 	"jinliconfig/manage"
+	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
+	"time"
 )
 
 // https网站创建注意事项
@@ -47,6 +51,37 @@ func main() {
 						欢迎使用锦鲤网站管理系统 v1.1
 		`
 	fmt.Println(Welcome)
+
+	//检测版本更新 3秒
+	timeout := time.Duration(3 * time.Second)
+	client := http.Client{
+		Timeout: timeout,
+	}
+	seedURL := "https://api.github.com/repos/jinlicode/jinliconfig/releases"
+	resp, err := client.Get(seedURL)
+	if err == nil {
+
+		body, error := ioutil.ReadAll(resp.Body)
+
+		if error == nil {
+
+			resTag := gjson.Get(string(body), "#.tag_name")
+
+			resTagSlice := resTag.Array()
+			jinliVersion := resTagSlice[0].String()
+
+			//判断版本
+			if jinliVersion != "v"+strconv.FormatFloat(JINLIVER, 'f', -1, 64) {
+				//程序升级提示需
+				fmt.Println("程序正在升级中，请勿退出程序......")
+				class.ExecLinuxCommand("wget -O /tmp/jinliconfig https://release.jinli.plus/linux/x86_64/jinliconfig && mv /usr/sbin/jinliconfig /usr/sbin/jinliconfig_" + strconv.FormatFloat(JINLIVER, 'f', -1, 64) + " && mv /tmp/jinliconfig /usr/sbin/jinliconfig && chmod +x /usr/sbin/jinliconfig")
+				fmt.Println("程序升级成功，请重新运行")
+				os.Exit(1)
+
+			}
+		}
+
+	}
 
 	//检测安装的docker是否符合运行环境要求
 	DockerClaim := class.ChkDokcerInstall()
