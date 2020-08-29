@@ -96,6 +96,9 @@ CreateNewSiteFlag:
 			ExistStopSiteSlice := []string{}
 
 			ExistSiteSlice = class.GetPathFiles(BASEPATH+"config/nginx/", false)
+			if class.CheckFileExist(BASEPATH+"config/nginx_stop/") == false {
+				class.ExecLinuxCommand("mkdir " + BASEPATH + "config/nginx_stop/")
+			}
 			ExistStopSiteSlice = class.GetPathFiles(BASEPATH+"config/nginx_stop/", false)
 
 			for k, v := range ExistSiteSlice {
