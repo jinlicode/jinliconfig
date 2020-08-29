@@ -104,6 +104,24 @@ func InstallJinliCode(basepath string, jinliVersion float32) bool {
 		fmt.Println("服务正在启动中，预计需要10分钟，请您耐心等待......")
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose up -d && docker-compose stop phpmyadmin")
 
+		//创建拉取任务
+		fmt.Println("创建后台拉取镜像任务成功")
+		class.ExecLinuxCommand("nohup docker pull registry.cn-beijing.aliyuncs.com/jinlicode/mysql:latest > /dev/null 2>&1 & ")
+		class.ExecLinuxCommand("nohup docker pull registry.cn-beijing.aliyuncs.com/jinlicode/php:v5.6-sec > /dev/null 2>&1 & ")
+		class.ExecLinuxCommand("nohup docker pull registry.cn-beijing.aliyuncs.com/jinlicode/php:v5.6 > /dev/null 2>&1 & ")
+		class.ExecLinuxCommand("nohup docker pull registry.cn-beijing.aliyuncs.com/jinlicode/php:v7.0-sec > /dev/null 2>&1 & ")
+		class.ExecLinuxCommand("nohup docker pull registry.cn-beijing.aliyuncs.com/jinlicode/php:v7.0 > /dev/null 2>&1 & ")
+		class.ExecLinuxCommand("nohup docker pull registry.cn-beijing.aliyuncs.com/jinlicode/php:v7.1-sec > /dev/null 2>&1 & ")
+		class.ExecLinuxCommand("nohup docker pull registry.cn-beijing.aliyuncs.com/jinlicode/php:v7.1 > /dev/null 2>&1 & ")
+		class.ExecLinuxCommand("nohup docker pull registry.cn-beijing.aliyuncs.com/jinlicode/php:v7.2-sec > /dev/null 2>&1 & ")
+		class.ExecLinuxCommand("nohup docker pull registry.cn-beijing.aliyuncs.com/jinlicode/php:v7.2 > /dev/null 2>&1 & ")
+		class.ExecLinuxCommand("nohup docker pull registry.cn-beijing.aliyuncs.com/jinlicode/php:v7.3-sec > /dev/null 2>&1 & ")
+		class.ExecLinuxCommand("nohup docker pull registry.cn-beijing.aliyuncs.com/jinlicode/php:v7.3 > /dev/null 2>&1 & ")
+		class.ExecLinuxCommand("nohup docker pull registry.cn-beijing.aliyuncs.com/jinlicode/nginx:v1 > /dev/null 2>&1 & ")
+		class.ExecLinuxCommand("nohup docker pull registry.cn-beijing.aliyuncs.com/jinlicode/memcached:1.6.6 > /dev/null 2>&1 & ")
+		class.ExecLinuxCommand("nohup docker pull registry.cn-beijing.aliyuncs.com/jinlicode/redis:5.0.9 > /dev/null 2>&1 & ")
+		class.ExecLinuxCommand("nohup docker pull registry.cn-beijing.aliyuncs.com/jinlicode/phpmyadmin:5.0.2 > /dev/null 2>&1 & ")
+
 		//回显数据库密码
 		fmt.Println("\n=======================数据库ROOT信息===========================")
 		fmt.Println("。数据库服务器地址:" + class.ReadMysqlHost(basepath))
