@@ -72,8 +72,10 @@ func main() {
 			resTagSlice := resTag.Array()
 			jinliVersion := resTagSlice[0].String()
 
+			jinliVersionString := strings.Replace(jinliVersion, "v", "", -1)
+
 			//判断版本
-			if jinliVersion != "v"+strconv.FormatFloat(JINLIVER, 'f', -1, 64) {
+			if class.CompareVersion(strconv.FormatFloat(JINLIVER, 'f', -1, 64), jinliVersionString) == -1 {
 				//程序升级提示需
 				fmt.Println("程序正在升级中，请勿退出程序......")
 				class.ExecLinuxCommand("wget -O /tmp/jinliconfig https://release.jinli.plus/linux/x86_64/jinliconfig && mv /usr/sbin/jinliconfig /usr/sbin/jinliconfig_" + strconv.FormatFloat(JINLIVER, 'f', -1, 64) + " && mv /tmp/jinliconfig /usr/sbin/jinliconfig && chmod +x /usr/sbin/jinliconfig")

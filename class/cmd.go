@@ -56,7 +56,7 @@ func ExecLinuxCommandReturn(BashCommand string) string {
 }
 
 //版本号对比version1系统版本，version2为最低版本 返回值：1为正常，-1为版本过低， 0为版本匹配
-func compareVersion(version1 string, version2 string) int {
+func CompareVersion(version1 string, version2 string) int {
 	versionA := strings.Split(version1, ".")
 	versionB := strings.Split(version2, ".")
 
@@ -85,12 +85,12 @@ func ChkDokcerInstall() bool {
 	DockerReturen := ExecLinuxCommandReturn("docker -v")
 	DockerReturenRe, _ := regexp.Compile(`\d+(?:\.\d+)+`)
 	DockerVersion := DockerReturenRe.FindString(DockerReturen)
-	DockerInstallResult := compareVersion(DockerVersion, "19.03.12")
+	DockerInstallResult := CompareVersion(DockerVersion, "19.03.12")
 	if DockerInstallResult != -1 {
 		DockerComposeReturen := ExecLinuxCommandReturn("docker-compose -v")
 		DockerComposeReturenRe, _ := regexp.Compile(`\d+(?:\.\d+)+`)
 		DockerComposeVersion := DockerComposeReturenRe.FindString(DockerComposeReturen)
-		DockerComposeInstallResult := compareVersion(DockerComposeVersion, "1.18.0")
+		DockerComposeInstallResult := CompareVersion(DockerComposeVersion, "1.18.0")
 		if DockerComposeInstallResult == -1 {
 			return false
 		} else {
