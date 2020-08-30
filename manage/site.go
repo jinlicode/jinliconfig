@@ -82,6 +82,13 @@ ReInputSiteDomainFlag:
 		"7.3-sec",
 	}, "请输入选项")
 
+	//是否使用一键安装
+	NewSiteOne := class.ConsoleOptionsSelect("是否使用一键安装网站", []string{"是", "否"}, "请选择")
+	var NewSiteOneApp string
+	if NewSiteOne == "是" {
+		NewSiteOneApp = class.ConsoleOptionsSelect("选择您需要安装的程序", []string{"discuz", "wordpress"}, "请选择")
+	}
+
 	//是否写入伪静态
 	NewSiteRewrite := class.ConsoleOptionsSelect("请选择您程序的伪静态", []string{
 		"不使用",
@@ -242,6 +249,10 @@ ReInputSiteDomainFlag:
 	//自动创建数据库 用户名 密码
 	class.CreateDatabase(basepath, MysqlRootPasswordString, newDomain, newDomain, mysqlSiteRandPassword)
 
+	//一键安装网站
+	if NewSiteOne == "是" {
+		OneCreateSite(basepath, newDomain, NewSiteOneApp)
+	}
 	//显示新网站内容
 
 	fmt.Println("\n=======================您的网站对应信息==========================")

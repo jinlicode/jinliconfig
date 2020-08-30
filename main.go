@@ -96,6 +96,7 @@ func main() {
 			//删除老的docker 重新安装特定的docker
 			class.ChkDokcerRemove()
 			class.ExecDockerInstall()
+			fmt.Println("安装基础环境完成。")
 		} else {
 			os.Exit(3)
 		}
