@@ -129,7 +129,7 @@ func ExecDockerInstall() {
 
 	//设置docker源
 	ExecLinuxCommand("mkdir -p /etc/docker")
-	WriteFile("/etc/docker/daemon.json", `{"registry-mirrors":["https://docker.mirrors.ustc.edu.cn"],"log-driver":"json-file","log-opts":{"max-size":"1m","max-file":"1"}}`)
+	WriteFile("/etc/docker/daemon.json", `{"log-driver":"json-file","log-opts":{"max-size":"1m","max-file":"1"}}`)
 
 	//重载docker
 	ExecLinuxCommand("sudo systemctl daemon-reload && sudo systemctl restart docker")
