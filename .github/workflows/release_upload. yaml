@@ -28,7 +28,10 @@ jobs:
         fi
         
     - name: Build
-      run: go build
+      run: go build -ldflags "-s -w"
+    
+    - name: upx
+      run: chmod +x ./bin/upx && ./bin/upx -k -9 --brute jinliconfig
       
     - name: chkls
       run: ls
