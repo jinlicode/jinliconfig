@@ -125,7 +125,7 @@ CreateNewSiteFlag:
 
 		//服务选择主菜单
 	ServiceSelectFlag:
-		ServiceSelect := class.ConsoleOptionsSelect("请选择您需要的服务", []string{"网站服务", "备份管理", "数据库管理", "权限修复", "升级系统镜像", "服务器监控", "退出"}, "请输入选项")
+		ServiceSelect := class.ConsoleOptionsSelect("请选择您需要的服务", []string{"网站服务", "备份管理", "数据库管理", "权限修复", "升级系统镜像", "服务器监控", "Mysql服务", "退出"}, "请输入选项")
 		switch ServiceSelect {
 		case "网站服务":
 			//网站服务选择主菜单
@@ -212,8 +212,24 @@ CreateNewSiteFlag:
 				goto ServiceSelectFlag
 
 			}
-			// goto WebServiceSelect //随便添加的一会删除
+		case "Mysql服务":
+			MysqlServerSelect := class.ConsoleOptionsSelect("请选择mysql服务", []string{"重启", "暂停", "返回上层"}, "请选择选项")
 
+			switch MysqlServerSelect {
+			case "重启":
+				class.ExecLinuxCommand("cd " + BASEPATH + " && " + "docker-compose up -d mysql")
+				fmt.Println("重启成功")
+				goto ServiceSelectFlag
+
+			case "暂停":
+				class.ExecLinuxCommand("cd " + BASEPATH + " && " + "docker-compose stop mysql")
+				fmt.Println("暂停成功")
+				goto ServiceSelectFlag
+
+			case "返回上层":
+				goto ServiceSelectFlag
+
+			}
 		case "退出":
 			fmt.Println("退出")
 			break //可以添加
