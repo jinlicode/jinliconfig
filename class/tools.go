@@ -173,3 +173,26 @@ func GetComposeServerNetString(basepath string, serverName string, fullName bool
 	netNumSlice := strings.Split(netString, ".")
 	return netNumSlice[3]
 }
+
+//PHPChooseVersion php版本选择
+func PHPChooseVersion(back bool) string {
+
+	phpVersion := []string{
+		"5.6",
+		"5.6-sec(安全版本)",
+		"7.0",
+		"7.0-sec(安全版本)",
+		"7.1",
+		"7.1-sec(安全版本)",
+		"7.2",
+		"7.2-sec(安全版本)",
+		"7.3",
+		"7.3-sec(安全版本)",
+	}
+	if back == true {
+		phpVersion = append(phpVersion, "返回上层")
+	}
+	PhpVersion := ConsoleOptionsSelect("请选择您需要的php版本, sec版本为安全版本", phpVersion, "请输入选项")
+
+	return strings.Replace(PhpVersion, "(安全版本)", "", -1)
+}

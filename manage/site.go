@@ -69,18 +69,9 @@ ReInputSiteDomainFlag:
 		// 	println(x509Cert.NotAfter.Format("2006-01-02 15:04:05"))
 
 	}
-	NewSitePhpVersion := class.ConsoleOptionsSelect("请选择您需要的php版本, sec版本为安全版本", []string{
-		"5.6",
-		"5.6-sec",
-		"7.0",
-		"7.0-sec",
-		"7.1",
-		"7.1-sec",
-		"7.2",
-		"7.2-sec",
-		"7.3",
-		"7.3-sec",
-	}, "请输入选项")
+
+	//选择php版本
+	NewSitePhpVersion := class.PHPChooseVersion(false)
 
 	//是否使用一键安装
 	NewSiteOne := class.ConsoleOptionsSelect("是否使用一键安装网站", []string{"是", "否"}, "请选择")
@@ -308,6 +299,10 @@ func SiteManage(basepath string, WebServiceSelect string, DockerComposeYamlMap m
 		} else {
 			WebConfigSelectManageOption = append(WebConfigSelectManageOption, "开启"+WebServiceSelect+"的memcached服务")
 		}
+
+		//切换php版本
+		WebConfigSelectManageOption = append(WebConfigSelectManageOption, "更改"+WebServiceSelect+"的PHP版本")
+
 	}
 
 	WebConfigSelectOption = append(WebConfigSelectManageOption, WebConfigSelectDelOption...)
@@ -430,6 +425,40 @@ WebConfigSelectFlag:
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose exec nginx nginx -s reload")
 
 		fmt.Println("暂停成功")
+		return false
+
+		//更改php版本
+	case "更改" + WebServiceSelect + "的PHP版本":
+		//选择php版本
+		PhpVersion := class.PHPChooseVersion(true)
+
+		if PhpVersion == "返回上层" {
+			return false
+		}
+
+		//再回显一次输入的内容判断是否真的要开始安装
+		ReConfirm := class.ConsoleUserConfirm("php版本:[" + PhpVersion + "]确定是否更改php版本")
+		if ReConfirm != true {
+			fmt.Println("已取消操作")
+			return false
+		}
+
+		//重新写入到yaml
+
+		imageString := DockerComposeYamlMap["services"].(map[string]interface{})[MapKey].(map[string]interface{})["image"].(string)
+		parttern := `jinlicode\/php:(.*)`
+		re, _ := regexp.Compile(parttern)
+		imageString = re.ReplaceAllString(imageString, `jinlicode/php:v`+PhpVersion)
+
+		DockerComposeYamlMap["services"].(map[string]interface{})[MapKey].(map[string]interface{})["image"] = imageString
+		// NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
+		fmt.Println(DockerComposeYamlMap["services"].(map[string]interface{})[MapKey].(map[string]interface{})["image"])
+
+		NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
+		class.WriteFile(basepath+"docker-compose.yaml", NewDockerComposeYamlString)
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose up -d " + MapKey)
+		fmt.Println("更改成功")
+
 		return false
 
 	case "关闭" + WebServiceSelect + "的redis服务":
