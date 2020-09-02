@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"jinliconfig/class"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -77,7 +76,7 @@ func BackupSiteManage(basepath string, ExistSiteSlice []string) bool {
 	case WebBuckupSelect:
 
 		WebSiteBuckupSelect := class.ConsoleOptionsSelect("请选择您需要备份选项", []string{WebBuckupSelect + "的数据库备份", WebBuckupSelect + "的网站备份", WebBuckupSelect + "的数据库+网站备份", "返回上层"}, "请输入选项")
-		WebSiteBuckupSelectString := strings.Replace(WebBuckupSelect, ".", "_", -1)
+		WebSiteBuckupSelectString := class.SiteDotToUnderline(WebBuckupSelect)
 
 		switch WebSiteBuckupSelect {
 		case "返回上层":

@@ -24,7 +24,7 @@ ReInputSiteDomainFlag:
 
 	//域名转下划线
 	newDomain := NewSiteDomain
-	newDomain = strings.Replace(newDomain, ".", "_", -1)
+	newDomain = class.SiteDotToUnderline(newDomain)
 
 	//检测是否还有项目目录存在
 	if class.CheckFileExist(basepath + "code/" + newDomain) {
@@ -271,40 +271,49 @@ func SiteManage(basepath string, WebServiceSelect string, DockerComposeYamlMap m
 
 	WebConfigSelect := ""
 	MapKey := ""
-
-	if strings.Index(WebServiceSelect, "（已暂停）") == -1 {
-
-		WebConfigSelect = class.ConsoleOptionsSelect("请选择您需要管理的网站服务", []string{
-			// WebServiceSelect + "的" + "nginx配置",
-			// WebServiceSelect + "的" + "php配置",
-			// WebServiceSelect + "的" + "数据库配置",
-			"查看" + WebServiceSelect + "数据库信息",
-			"更改" + WebServiceSelect + "的根目录",
-			"重置" + WebServiceSelect + "数据库密码",
-			"暂停" + WebServiceSelect + "网站服务",
-			"删除" + WebServiceSelect + "的网站(不删除数据)",
-			"删除" + WebServiceSelect + "的网站(删除数据，包含数据库和程序)",
-			"返回上层"}, "请输入选项")
-
-		MapKey = strings.Replace(WebServiceSelect, ".", "_", -1)
-	} else {
-
-		WebServiceSelect = strings.Replace(WebServiceSelect, "（已暂停）", "", -1)
-
-		WebConfigSelect = class.ConsoleOptionsSelect("请选择您需要管理的网站服务", []string{
-			// WebServiceSelect + "的" + "nginx配置",
-			// WebServiceSelect + "的" + "php配置",
-			// WebServiceSelect + "的" + "数据库配置",
-			"查看" + WebServiceSelect + "数据库信息",
-			"重置" + WebServiceSelect + "数据库密码",
-			"重启" + WebServiceSelect + "网站服务",
-			"删除" + WebServiceSelect + "的网站(不删除数据)",
-			"删除" + WebServiceSelect + "的网站(删除数据，包含数据库和程序)",
-			"返回上层"}, "请输入选项")
-
-		MapKey = strings.Replace(WebServiceSelect, ".", "_", -1)
-
+	WebConfigSelectOption := []string{}
+	WebConfigSelectManageOption := []string{
+		"查看" + WebServiceSelect + "数据库信息",
+		"更改" + WebServiceSelect + "的根目录",
+		"重置" + WebServiceSelect + "数据库密码",
 	}
+	WebConfigSelectDelOption := []string{
+		"删除" + WebServiceSelect + "的网站(不删除数据)",
+		"删除" + WebServiceSelect + "的网站(删除数据，包含数据库和程序)",
+	}
+
+	isStop := false
+	if strings.Index(WebServiceSelect, "（已暂停）") == -1 {
+		WebConfigSelectManageOption = append(WebConfigSelectManageOption, "暂停"+WebServiceSelect+"网站服务")
+		MapKey = class.SiteDotToUnderline(WebServiceSelect)
+	} else {
+		isStop = true
+		WebConfigSelectManageOption = append(WebConfigSelectManageOption, "重启"+WebServiceSelect+"网站服务")
+		MapKey = class.SiteDotToUnderline(strings.Replace(WebServiceSelect, "（已暂停）", "", -1))
+	}
+
+	//判断是否开启redis
+	if isStop == false {
+		redisCheck := class.CheckDockerMapServiceExist(basepath, MapKey+"_redis")
+
+		if redisCheck == true {
+			WebConfigSelectManageOption = append(WebConfigSelectManageOption, "关闭"+WebServiceSelect+"的redis服务")
+		} else {
+			WebConfigSelectManageOption = append(WebConfigSelectManageOption, "开启"+WebServiceSelect+"的redis服务")
+		}
+		//判断是否开启memcached
+		memcachedCheck := class.CheckDockerMapServiceExist(basepath, MapKey+"_memcached")
+		if memcachedCheck == true {
+			WebConfigSelectManageOption = append(WebConfigSelectManageOption, "关闭"+WebServiceSelect+"的memcached服务")
+		} else {
+			WebConfigSelectManageOption = append(WebConfigSelectManageOption, "开启"+WebServiceSelect+"的memcached服务")
+		}
+	}
+
+	WebConfigSelectOption = append(WebConfigSelectManageOption, WebConfigSelectDelOption...)
+	WebConfigSelectOption = append(WebConfigSelectOption, "返回上层")
+
+	WebConfigSelect = class.ConsoleOptionsSelect("请选择您需要管理的网站服务", WebConfigSelectOption, "请输入选项")
 
 	//网站内服务修改主菜单
 WebConfigSelectFlag:
@@ -411,7 +420,7 @@ WebConfigSelectFlag:
 		}
 
 		//输入命令 暂停容器
-		// fmt.Println("cd " + basepath + " && docker-compose stop " + strings.Replace(WebServiceSelect, ".", "_", -1))
+		// fmt.Println("cd " + basepath + " && docker-compose stop " + class.SiteDotToUnderline(WebServiceSelect))
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey)
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey + "_redis")
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey + "_memcached")
@@ -421,6 +430,70 @@ WebConfigSelectFlag:
 		class.ExecLinuxCommand("cd " + basepath + " && docker-compose exec nginx nginx -s reload")
 
 		fmt.Println("暂停成功")
+		return false
+
+	case "关闭" + WebServiceSelect + "的redis服务":
+
+		delete(DockerComposeYamlMap["services"].(map[string]interface{}), MapKey+"_redis")
+
+		//重新写入到yaml
+		NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
+		class.WriteFile(basepath+"docker-compose.yaml", NewDockerComposeYamlString)
+
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey + "_redis")
+		fmt.Println("关闭成功")
+
+		return false
+
+	case "开启" + WebServiceSelect + "的redis服务":
+
+		//获取redis 镜像模版
+		SitePhpRedisCompose := Template.DockerComposeRedis()
+
+		redisNetNumString := class.GetComposeServerNetString(basepath, MapKey, false)
+		//替换redis 内网
+		SitePhpRedisCompose = strings.Replace(SitePhpRedisCompose, "container_name: redis", "container_name: "+MapKey+"_redis", -1)
+		SitePhpRedisCompose = strings.Replace(SitePhpRedisCompose, "ipv4_address: 10.99.5.2", "ipv4_address: 10.99.5."+redisNetNumString, -1)
+		SitePhpRedisComposeMap := class.YamlFileToMap(SitePhpRedisCompose)
+		DockerComposeYamlMap["services"].(map[string]interface{})[MapKey+"_redis"] = SitePhpRedisComposeMap
+
+		NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
+		class.WriteFile(basepath+"docker-compose.yaml", NewDockerComposeYamlString)
+
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose up -d " + MapKey + "_redis")
+		fmt.Println("开启成功")
+
+		return false
+	case "关闭" + WebServiceSelect + "的memcached服务":
+
+		delete(DockerComposeYamlMap["services"].(map[string]interface{}), MapKey+"_memcached")
+
+		//重新写入到yaml
+		NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
+		class.WriteFile(basepath+"docker-compose.yaml", NewDockerComposeYamlString)
+
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose stop " + MapKey + "_memcached")
+		fmt.Println("关闭成功")
+
+		return false
+	case "开启" + WebServiceSelect + "的memcached服务":
+
+		//获取memcached 镜像模版
+		SitePhpMemcachedCompose := Template.DockerComposeMemcached()
+
+		memcachedNetNumString := class.GetComposeServerNetString(basepath, MapKey, false)
+		//替换memcached 内网
+		SitePhpMemcachedCompose = strings.Replace(SitePhpMemcachedCompose, "container_name: memcached", "container_name: "+MapKey+"_memcached", -1)
+		SitePhpMemcachedCompose = strings.Replace(SitePhpMemcachedCompose, "ipv4_address: 10.99.6.2", "ipv4_address: 10.99.6."+memcachedNetNumString, -1)
+		SitePhpMemcachedComposeMap := class.YamlFileToMap(SitePhpMemcachedCompose)
+		DockerComposeYamlMap["services"].(map[string]interface{})[MapKey+"_memcached"] = SitePhpMemcachedComposeMap
+
+		NewDockerComposeYamlString, _ := class.MapToYaml(DockerComposeYamlMap)
+		class.WriteFile(basepath+"docker-compose.yaml", NewDockerComposeYamlString)
+
+		class.ExecLinuxCommand("cd " + basepath + " && docker-compose up -d " + MapKey + "_memcached")
+		fmt.Println("开启成功")
+
 		return false
 
 	case "删除" + WebServiceSelect + "的网站(不删除数据)":

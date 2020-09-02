@@ -142,3 +142,34 @@ func GetComposeSiteNetMap(basepath string) map[int]int {
 	}
 	return netMap
 }
+
+// SiteDotToUnderline 点转下划线
+func SiteDotToUnderline(siteName string) string {
+	return strings.Replace(siteName, ".", "_", -1)
+}
+
+//CheckDockerMapServiceExist 判断是否存在
+func CheckDockerMapServiceExist(basepath string, siteName string) bool {
+
+	DockerComposeYamlRead := ReadFile(basepath + "docker-compose.yaml")
+	DockerComposeYamlMap := YamlFileToMap(DockerComposeYamlRead)
+
+	_, err := DockerComposeYamlMap["services"].(map[string]interface{})[siteName]
+
+	return err
+}
+
+//获取当前服务的内网ip
+func GetComposeServerNetString(basepath string, serverName string, fullName bool) string {
+	DockerComposeYamlRead := ReadFile(basepath + "docker-compose.yaml")
+	DockerComposeYamlMap := YamlFileToMap(DockerComposeYamlRead)
+
+	//获取内网数字
+	netString := DockerComposeYamlMap["services"].(map[string]interface{})[serverName].(map[string]interface{})["networks"].(map[string]interface{})["jinli_net"].(map[string]interface{})["ipv4_address"].(string)
+	if fullName == true {
+		return netString
+
+	}
+	netNumSlice := strings.Split(netString, ".")
+	return netNumSlice[3]
+}
