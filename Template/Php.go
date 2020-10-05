@@ -164,6 +164,6 @@ ldap.max_links = -1
 [curl]
 [openssl]
 [ffi]
-	`
+`
 	return TemplatePhpIniStrint
 }
